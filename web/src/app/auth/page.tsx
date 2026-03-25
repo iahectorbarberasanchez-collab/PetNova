@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type Mode = 'login' | 'signup'
@@ -19,6 +19,7 @@ const blurStyle = { borderColor: 'rgba(108,63,245,0.2)', boxShadow: 'none' }
 export default function AuthPage() {
     const supabase = createClient()
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [mode, setMode] = useState<Mode>('login')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -27,6 +28,15 @@ export default function AuthPage() {
     const [googleLoading, setGoogleLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    const [refCode, setRefCode] = useState<string | null>(null)
+
+    useEffect(() => {
+        const ref = searchParams.get('ref')
+        if (ref) {
+            setRefCode(ref.toUpperCase().trim())
+            setMode('signup') // Auto-switch to signup when coming via invite link
+        }
+    }, [searchParams])
 
     // ── Email/password ──────────────────────────────────────────────────────
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,10 +44,18 @@ export default function AuthPage() {
         setLoading(true); setError(null); setSuccess(null)
 
         if (mode === 'signup') {
+            // Build the callback URL including the referral code so the callback route can process it
+            const callbackUrl = refCode
+                ? `${window.location.origin}/auth/callback?ref=${refCode}`
+                : `${window.location.origin}/auth/callback`
+
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
-                options: { data: { full_name: name } },
+                options: {
+                    data: { full_name: name },
+                    emailRedirectTo: callbackUrl,
+                },
             })
             if (error) setError(error.message)
             else setSuccess('¡Revisa tu email para confirmar tu cuenta! 🐾')
@@ -52,10 +70,13 @@ export default function AuthPage() {
     // ── Google OAuth ────────────────────────────────────────────────────────
     const handleGoogle = async () => {
         setGoogleLoading(true); setError(null)
+        const callbackUrl = refCode
+            ? `${window.location.origin}/auth/callback?ref=${refCode}`
+            : `${window.location.origin}/auth/callback`
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: callbackUrl,
                 queryParams: { access_type: 'offline', prompt: 'consent' },
             },
         })
@@ -100,11 +121,32 @@ export default function AuthPage() {
                         marginBottom: 18, fontSize: 38,
                     }}>🐾</div>
                     <h1 style={{ fontSize: '2.4rem', fontFamily: 'Outfit, sans-serif', fontWeight: 800, marginBottom: 8, background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.02em' }}>
-                        PetNexa
+                        PetNova
                     </h1>
                     <p style={{ color: 'rgba(248,248,255,0.5)', fontSize: '1rem', fontWeight: 500 }}>
                         {mode === 'login' ? 'Bienvenido de vuelta 👋' : 'Únete a la comunidad 🐶🐱'}
                     </p>
+                    {/* Referral banner */}
+                    {refCode && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.4, delay: 0.3 }}
+                            style={{
+                                marginTop: 14,
+                                background: 'linear-gradient(135deg, rgba(108,63,245,0.18), rgba(0,212,255,0.12))',
+                                border: '1px solid rgba(108,63,245,0.35)',
+                                borderRadius: 14, padding: '10px 16px',
+                                display: 'flex', alignItems: 'center', gap: 10,
+                            }}
+                        >
+                            <span style={{ fontSize: '1.4rem' }}>🎁</span>
+                            <div style={{ textAlign: 'left' }}>
+                                <p style={{ color: '#A78BFA', fontWeight: 700, fontSize: '0.88rem', margin: 0 }}>¡Tienes una invitación!</p>
+                                <p style={{ color: 'rgba(248,248,255,0.6)', fontSize: '0.78rem', margin: 0 }}>Recibirás <strong style={{ color: '#FFD700' }}>100 PetCoins</strong> al registrarte</p>
+                            </div>
+                        </motion.div>
+                    )}
                 </motion.div>
 
                 {/* Card */}

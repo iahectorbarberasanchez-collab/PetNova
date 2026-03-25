@@ -100,7 +100,7 @@ export default function WalksFeedPage() {
                     <PageHeader
                         title="Paseos"
                         emoji="🦮"
-                        subtitle="Descubre las rutas de la comunidad PetNexa"
+                        subtitle="Descubre las rutas de la comunidad PetNova"
                         action={
                             <Link href="/dashboard/walks/record"
                                 className="px-6 py-3 rounded-xl border-none cursor-pointer font-outfit font-bold text-[0.85rem] transition-all flex items-center gap-2 bg-gradient-to-br from-[#00E5A0] to-[#00B37E] text-[#07070F] shadow-lg shadow-[#00E5A0]/20 hover:shadow-[#00E5A0]/40 hover:-translate-y-0.5"

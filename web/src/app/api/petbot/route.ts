@@ -5,7 +5,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
 
-const SYSTEM_PROMPT = `Eres PetBot, el asistente veterinario virtual de PetNexa. Eres amable, empático y experto en salud y bienestar animal.
+const SYSTEM_PROMPT = `Eres PetBot, el asistente veterinario virtual de PetNova. Eres amable, empático y experto en salud y bienestar animal.
 
 REGLAS:
 - Responde SIEMPRE en español.

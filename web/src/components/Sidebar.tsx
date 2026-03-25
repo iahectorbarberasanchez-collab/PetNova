@@ -29,6 +29,7 @@ const menuCategories = [
             { icon: '👥', label: 'Amigos', href: '/dashboard/friends' },
             { icon: '🚨', label: 'Alertas', href: '/dashboard/alerts' },
             { icon: '💞', label: 'Peludos', href: '/dashboard/match' },
+            { icon: '🎁', label: 'Invitar Amigos', href: '/dashboard/referral' },
         ]
     },
     {
@@ -83,16 +84,15 @@ export default function Sidebar() {
             {/* Logo */}
             <div style={{ padding: '26px 22px', borderBottom: '1px solid rgba(108,63,245,0.12)' }}>
                 <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-                    <div style={{
+                    <img src="/logo.png" alt="PetNova Logo" style={{
                         width: 42, height: 42, borderRadius: 13,
-                        background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 22, boxShadow: '0 4px 20px rgba(108,63,245,0.4)',
-                    }}>🐾</div>
+                        boxShadow: '0 4px 20px rgba(108,63,245,0.4)',
+                        objectFit: 'cover'
+                    }} />
                     <div>
                         <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.15rem', lineHeight: 1 }}>
                             <span style={{ background: 'linear-gradient(135deg, #8B5CF6, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                                PetNexa
+                                PetNova
                             </span>
                         </div>
                         <div style={{ fontSize: '0.68rem', color: 'rgba(248,248,255,0.35)', marginTop: 2 }}>v1.0 Beta</div>

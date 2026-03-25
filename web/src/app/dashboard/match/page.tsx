@@ -17,7 +17,15 @@ interface Pet {
     breed: string | null
     birth_date: string | null
     avatar_url: string | null
+    wants_to_breed?: boolean
+    pet_photos?: { id: string }[]
     profiles: { display_name: string }
+}
+
+function meetsMatchRequirements(pet: Pet): boolean {
+    if (!pet.wants_to_breed) return false
+    const photoCount = (pet.pet_photos?.length || 0) + (pet.avatar_url ? 1 : 0)
+    return photoCount >= 3
 }
 
 interface Match {
@@ -64,7 +72,7 @@ export default function MatchPage() {
             // Get all user's pets
             const { data: userPets } = await supabase
                 .from('pets')
-                .select('id, name, species, breed, birth_date, avatar_url, profiles:owner_id(display_name)')
+                .select('id, name, species, breed, birth_date, avatar_url, wants_to_breed, profiles:owner_id(display_name), pet_photos(id)')
                 .eq('owner_id', userData.user.id)
 
             if (!userPets || userPets.length === 0) {
@@ -99,16 +107,21 @@ export default function MatchPage() {
             // Get candidates (other pets, excluding already swiped and own)
             let query = supabase
                 .from('pets')
-                .select('id, name, species, breed, birth_date, avatar_url, profiles:owner_id(display_name)')
+                .select('id, name, species, breed, birth_date, avatar_url, wants_to_breed, profiles:owner_id(display_name), pet_photos(id)')
                 .neq('owner_id', userId)
-                .limit(20)
+                .eq('wants_to_breed', true)
+                .limit(100)
 
             if (swipedIds.length > 0) {
                 query = query.not('id', 'in', `(${swipedIds.join(',')})`)
             }
 
-            const { data: candidatesData } = await query
-            setCandidates((candidatesData as any) || [])
+            const { data: rawCandidates } = await query
+            
+            // Filter candidates that meet requirements (>= 3 photos)
+            const validCandidates = (rawCandidates as unknown as Pet[] || []).filter(meetsMatchRequirements)
+            
+            setCandidates(validCandidates.slice(0, 20))
 
             // Get matches for THIS pet
             await loadMatches(petId)
@@ -300,6 +313,19 @@ export default function MatchPage() {
                                 exit={{ opacity: 0, x: -20 }}
                                 className="flex flex-col items-center"
                             >
+                                {!meetsMatchRequirements(myPet) ? (
+                                    <div className="w-full h-[520px] rounded-[32px] border border-red-500/30 flex flex-col items-center justify-center gap-4 bg-red-500/5 backdrop-blur-sm p-8 text-center mt-4">
+                                        <div className="text-6xl mb-2">📸</div>
+                                        <h3 className="text-xl font-bold text-red-400">Requisitos no cumplidos</h3>
+                                        <p className="text-white/60 text-sm mb-6 max-w-sm mx-auto">
+                                            Para usar el Match (Montas), <b>{myPet.name}</b> debe tener activada la opción "Disponible para Match" y contar con al menos 3 fotos en su perfil.
+                                        </p>
+                                        <Link href={`/dashboard/pets/${myPet.id}`}>
+                                            <PremiumButton variant="primary">Completar Perfil</PremiumButton>
+                                        </Link>
+                                    </div>
+                                ) : (
+                                <>
                                 {/* Swipe Card Container */}
                                 <div className="w-full relative h-[520px]">
                                     {loadingCandidates ? (
@@ -424,6 +450,8 @@ export default function MatchPage() {
                                             <Heart className="w-10 h-10 fill-white" strokeWidth={0} />
                                         </motion.button>
                                     </div>
+                                )}
+                                </>
                                 )}
                             </motion.div>
 

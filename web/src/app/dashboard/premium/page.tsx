@@ -27,9 +27,9 @@ export default function PremiumPage() {
 
             <main className="dashboard-main">
                 <PageHeader
-                    title="PetNexa Premium"
+                    title="PetNova Premium"
                     emoji="⭐"
-                    subtitle="Desbloquea todo el potencial de PetNexa y dale la mejor vida a tu mascota conectando con nuestra IA experta y acceso exclusivo."
+                    subtitle="Desbloquea todo el potencial de PetNova y dale la mejor vida a tu mascota conectando con nuestra IA experta y acceso exclusivo."
                     action={
                         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-full p-1 flex">
                             <button
@@ -93,7 +93,7 @@ export default function PremiumPage() {
                         <div className="flex items-center justify-between mb-8 relative z-10">
                             <div>
                                 <h3 className="font-outfit font-extrabold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#00D4FF] mb-2 flex items-center gap-2 drop-shadow-sm">
-                                    PetNexa Pro 👑
+                                    PetNova Pro 👑
                                 </h3>
                                 <p className="text-white/60 text-sm">La experiencia definitiva.</p>
                             </div>

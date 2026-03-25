@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         const weight = petContext.weight_kg || petContext.weight;
         if (weight) petDetails += `, pesa ${weight}kg`
 
-        const systemPrompt = `Eres el asistente experto veterinario de PetNexa. 
+        const systemPrompt = `Eres el asistente experto veterinario de PetNova. 
 Tu única tarea ahora es generar UN (1) solo consejo proactivo (Proactive Tip) para la mascota del usuario basada ESTRICTAMENTE en su perfil: ${petDetails}.
 
 REGLAS:

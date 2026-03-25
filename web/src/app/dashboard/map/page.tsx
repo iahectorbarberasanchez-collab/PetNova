@@ -68,7 +68,7 @@ const DARK_STYLES = [
 declare global {
     interface Window {
         google: typeof google
-        initPetNexaMap: () => void
+        initPetNovaMap: () => void
     }
 }
 
@@ -104,11 +104,11 @@ export default function MapPage() {
         if (window.google?.maps) { setMapReady(true); return }
         if (document.getElementById('gmap-script')) return
 
-        window.initPetNexaMap = () => setMapReady(true)
+        window.initPetNovaMap = () => setMapReady(true)
 
         const script = document.createElement('script')
         script.id = 'gmap-script'
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=places,geometry,marker&callback=initPetNexaMap&loading=async`
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=places,geometry,marker&callback=initPetNovaMap&loading=async`
         script.async = true
         script.defer = true
         document.head.appendChild(script)
@@ -127,7 +127,7 @@ export default function MapPage() {
             streetViewControl: false,
             fullscreenControl: true,
             styles: DARK_STYLES,
-            mapId: 'PETNEXA_MAP_ID', // Requerido para Advanced Markers
+            mapId: 'PetNova_MAP_ID', // Requerido para Advanced Markers
         })
         mapInstanceRef.current = map
 

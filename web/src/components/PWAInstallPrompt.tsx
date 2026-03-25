@@ -99,11 +99,11 @@ export default function PWAInstallPrompt() {
             </motion.div>
 
             <div className="flex-1 min-w-0 relative z-10">
-              <h3 className="text-white font-bold text-sm tracking-tight">Instalar PetNexa</h3>
+              <h3 className="text-white font-bold text-sm tracking-tight">Instalar PetNova</h3>
               <p className="text-white/60 text-xs leading-relaxed truncate">
                 {isIOS 
                   ? 'Toca Compartir > "Añadir a pantalla de inicio"' 
-                  : 'Usa PetNexa como una App nativa en tu móvil.'}
+                  : 'Usa PetNova como una App nativa en tu móvil.'}
               </p>
             </div>
 

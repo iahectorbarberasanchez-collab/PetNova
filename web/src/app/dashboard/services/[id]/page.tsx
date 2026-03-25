@@ -22,15 +22,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { id } = await params
     const provider = await getProvider(id)
 
-    if (!provider) return { title: 'Profesional no encontrado | PetNexa' }
+    if (!provider) return { title: 'Profesional no encontrado | PetNova' }
 
     const name = provider.profiles?.full_name || 'Profesional'
     const serviceTypes = provider.services.map((s: any) => s.service_type)
     
     return {
-        title: `${name} | ${provider.headline} | PetNexa`,
+        title: `${name} | ${provider.headline} | PetNova`,
         description: provider.bio.slice(0, 160),
-        keywords: [name, provider.location_city, ...serviceTypes, 'cuidado de mascotas', 'PetNexa'],
+        keywords: [name, provider.location_city, ...serviceTypes, 'cuidado de mascotas', 'PetNova'],
     }
 }
 
@@ -40,7 +40,7 @@ export default async function ProviderDetailPage({ params }: Props) {
 
     if (!provider) notFound()
 
-    const name = provider.profiles?.full_name || 'Profesional PetNexa'
+    const name = provider.profiles?.full_name || 'Profesional PetNova'
     
     const jsonLd = {
         '@context': 'https://schema.org',

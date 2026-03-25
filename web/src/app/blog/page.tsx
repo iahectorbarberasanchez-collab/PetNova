@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Blog – PetNexa | Consejos para tu Mascota',
+    title: 'Blog – PetNova | Consejos para tu Mascota',
     description: 'Artículos semanales sobre salud, cuidados, nutrición y más para tu mascota. Redactados por expertos.',
 }
 
@@ -64,7 +64,7 @@ export default async function BlogPage() {
                 <Link href="/" className="flex items-center gap-[10px] no-underline">
                     <div className="w-[38px] h-[38px] rounded-[11px] bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] flex items-center justify-center text-[20px]">🐾</div>
                     <span className="font-['Outfit',_sans-serif] font-extrabold text-[1.25rem] bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">
-                        PetNexa
+                        PetNova
                     </span>
                 </Link>
                 <div className="flex gap-[12px] items-center">
@@ -88,7 +88,7 @@ export default async function BlogPage() {
                     </div>
                     <h1 className="text-[clamp(2.2rem,5vw,3.8rem)] font-black mb-4 font-['Outfit',_sans-serif] tracking-tight">
                         Blog{' '}
-                        <span className="bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">PetNexa</span>
+                        <span className="bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">PetNova</span>
                     </h1>
                     <p className="text-[rgba(248,248,255,0.6)] text-[1.05rem] max-w-[560px] mx-auto leading-relaxed">
                         Todo lo que necesitas saber para cuidar a tu mascota. Consejos de expertos, salud, nutrición y mucho más.
@@ -184,8 +184,8 @@ export default async function BlogPage() {
 
             {/* Footer */}
             <footer className="relative z-10 border-t border-[rgba(108,63,245,0.1)] py-7 px-6 md:px-[52px] flex flex-col sm:flex-row justify-between items-center flex-wrap gap-3">
-                <span className="font-['Outfit',_sans-serif] font-bold bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">🐾 PetNexa</span>
-                <p className="text-[rgba(248,248,255,0.4)] text-[0.82rem] text-center">© 2026 PetNexa. Todos los derechos reservados.</p>
+                <span className="font-['Outfit',_sans-serif] font-bold bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">🐾 PetNova</span>
+                <p className="text-[rgba(248,248,255,0.4)] text-[0.82rem] text-center">© 2026 PetNova. Todos los derechos reservados.</p>
             </footer>
         </main>
     )

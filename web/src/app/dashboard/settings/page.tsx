@@ -189,7 +189,7 @@ export default function SettingsPage() {
         if (!confirm1) return
         const confirm2 = prompt('Escribe "ELIMINAR" para confirmar:')
         if (confirm2 !== 'ELIMINAR') { alert('Cancelado. Texto incorrecto.'); return }
-        alert('Para eliminar tu cuenta, contacta con soporte en: hola@petnexa.app')
+        alert('Para eliminar tu cuenta, contacta con soporte en: hola@PetNova.app')
     }
 
     // ── Styles ────────────────────────────────────────────────────────────────
@@ -295,7 +295,7 @@ export default function SettingsPage() {
                         <Section title="Notificaciones" icon="🔔">
                             <Toggle checked={nEmail} onChange={() => setNEmail(!nEmail)}
                                 label="Actualizaciones por email"
-                                desc="Recibe resúmenes semanales y novedades de PetNexa" />
+                                desc="Recibe resúmenes semanales y novedades de PetNova" />
                             <Toggle checked={nAlerts} onChange={() => setNAlerts(!nAlerts)}
                                 label="Alertas de mascotas perdidas"
                                 desc="Notificaciones cuando aparezcan alertas cerca de tu ciudad" />

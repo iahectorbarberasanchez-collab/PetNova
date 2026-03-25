@@ -450,7 +450,7 @@ export default function HealthPage() {
                                                 {petbotTip || '🐾 Mantener al día la desparasitación previene enfermedades graves en el corazón y pulmones. ¡Un pequeño gesto hoy es mucha salud mañana!'}
                                             </p>
                                             <div className="mt-4 pt-4 border-t border-white/5 flex justify-end">
-                                                <div className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">Powered by PetNexa AI</div>
+                                                <div className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">Powered by PetNova AI</div>
                                             </div>
                                         </div>
                                     )}

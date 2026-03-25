@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 export async function GET(request: NextRequest) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
+    const ref  = requestUrl.searchParams.get('ref')   // referral code
     const next = requestUrl.searchParams.get('next') ?? '/dashboard'
 
     if (code) {
@@ -24,6 +25,19 @@ export async function GET(request: NextRequest) {
             }
         )
         await supabase.auth.exchangeCodeForSession(code)
+
+        // Process referral reward if a code was provided
+        if (ref) {
+            try {
+                await fetch(`${requestUrl.origin}/api/referral/process`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', cookie: request.headers.get('cookie') ?? '' },
+                    body: JSON.stringify({ code: ref }),
+                })
+            } catch {
+                // Non-critical: do not block login
+            }
+        }
     }
 
     return NextResponse.redirect(new URL(next, requestUrl.origin))

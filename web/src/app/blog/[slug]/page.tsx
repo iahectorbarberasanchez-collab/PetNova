@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         .eq('published', true)
         .single()
 
-    if (!post) return { title: 'Artículo no encontrado – PetNexa' }
+    if (!post) return { title: 'Artículo no encontrado – PetNova' }
 
     return {
-        title: `${post.title} – Blog PetNexa`,
-        description: post.excerpt || 'Lee este artículo en el blog de PetNexa.',
+        title: `${post.title} – Blog PetNova`,
+        description: post.excerpt || 'Lee este artículo en el blog de PetNova.',
         openGraph: {
             title: post.title,
             description: post.excerpt ?? undefined,
@@ -94,7 +94,7 @@ export default async function BlogPostPage({ params }: Props) {
             }}>
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
                     <div style={{ width: 38, height: 38, borderRadius: 11, background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🐾</div>
-                    <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.25rem', background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PetNexa</span>
+                    <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.25rem', background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PetNova</span>
                 </Link>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                     <Link href="/blog" style={{ padding: '9px 22px', borderRadius: 11, border: '1px solid rgba(108,63,245,0.25)', color: 'rgba(248,248,255,0.7)', fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.88rem', textDecoration: 'none' }}>
@@ -110,7 +110,7 @@ export default async function BlogPostPage({ params }: Props) {
             <article style={{ position: 'relative', zIndex: 1, maxWidth: 780, margin: '0 auto', padding: '108px 24px 80px' }}>
                 {/* Breadcrumb */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 32, color: 'rgba(248,248,255,0.3)', fontSize: '0.8rem' }}>
-                    <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>PetNexa</Link>
+                    <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>PetNova</Link>
                     <span>/</span>
                     <Link href="/blog" style={{ color: 'inherit', textDecoration: 'none' }}>Blog</Link>
                     <span>/</span>
@@ -181,7 +181,7 @@ export default async function BlogPostPage({ params }: Props) {
                 }}>
                     <div style={{ fontSize: 40, marginBottom: 16 }}>🐾</div>
                     <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.4rem', marginBottom: 12 }}>¿Te ha sido útil este artículo?</h3>
-                    <p style={{ color: 'rgba(248,248,255,0.5)', marginBottom: 28, lineHeight: 1.7 }}>Únete a PetNexa y accede a más consejos personalizados para tu mascota.</p>
+                    <p style={{ color: 'rgba(248,248,255,0.5)', marginBottom: 28, lineHeight: 1.7 }}>Únete a PetNova y accede a más consejos personalizados para tu mascota.</p>
                     <Link href="/auth" style={{
                         padding: '14px 40px', borderRadius: 12,
                         background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)',
@@ -231,8 +231,8 @@ export default async function BlogPostPage({ params }: Props) {
 
             {/* Footer */}
             <footer style={{ position: 'relative', zIndex: 1, borderTop: '1px solid rgba(108,63,245,0.1)', padding: '28px 52px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🐾 PetNexa</span>
-                <p style={{ color: 'rgba(248,248,255,0.25)', fontSize: '0.82rem' }}>© 2026 PetNexa. Todos los derechos reservados.</p>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🐾 PetNova</span>
+                <p style={{ color: 'rgba(248,248,255,0.25)', fontSize: '0.82rem' }}>© 2026 PetNova. Todos los derechos reservados.</p>
             </footer>
         </main>
     )

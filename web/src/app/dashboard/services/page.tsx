@@ -3,7 +3,7 @@ import ServicesClient from './ServicesClient'
 import { JsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
-    title: 'Servicios para Mascotas | PetNexa',
+    title: 'Servicios para Mascotas | PetNova',
     description: 'Encuentra los mejores paseadores, cuidadores y adiestradores para tu mascota. Profesionales verificados cerca de ti.',
     keywords: ['paseador de perros', 'cuidador de gatos', 'adiestramiento canino', 'peluquería mascotas', 'veterinario cerca de mi'],
 }
@@ -12,7 +12,7 @@ export default function ServicesPage() {
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
-        'name': 'Servicios para Mascotas en PetNexa',
+        'name': 'Servicios para Mascotas en PetNova',
         'description': 'Directorio de profesionales verificados para el cuidado de mascotas.',
         'itemListElement': [
             {

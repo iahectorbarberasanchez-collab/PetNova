@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'PetNexa – La App para tu Mascota',
+  title: 'PetNova – La App para tu Mascota',
   description: 'La plataforma definitiva para dueños de mascotas. Cartilla médica, red social, alertas y mucho más.',
-  keywords: ['mascotas', 'perros', 'gatos', 'veterinario', 'cuidado animal', 'petnexa'],
+  keywords: ['mascotas', 'perros', 'gatos', 'veterinario', 'cuidado animal', 'PetNova'],
   manifest: '/manifest.json',
   themeColor: '#6C3FF5',
   viewport: {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'PetNexa',
+    title: 'PetNova',
     startupImage: '/icons/icon-512x512.png',
   },
   icons: {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'PetNexa – La App para tu Mascota',
+    title: 'PetNova – La App para tu Mascota',
     description: 'Todo lo que tu mascota necesita en un solo lugar.',
     type: 'website',
   },

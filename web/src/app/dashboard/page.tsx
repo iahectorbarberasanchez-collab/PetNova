@@ -102,7 +102,7 @@ export default function DashboardPage() {
                 >
                     🐾
                 </motion.div>
-                <p className="text-[#F8F8FF66] font-['Outfit'] tracking-wide">Cargando tu ecosistema PetNexa...</p>
+                <p className="text-[#F8F8FF66] font-['Outfit'] tracking-wide">Cargando tu ecosistema PetNova...</p>
             </motion.div>
         </div>
     )

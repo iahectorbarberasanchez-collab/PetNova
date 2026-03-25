@@ -25,7 +25,11 @@ const SPECIES_OPTIONS = [
 interface Pet {
     id: string; name: string; species: string; breed: string | null
     birth_date: string | null; weight_kg: number | null
-    avatar_url: string | null; created_at: string
+    avatar_url: string | null; created_at: string; wants_to_breed: boolean
+}
+
+interface PetPhoto {
+    id: string; photo_url: string; created_at: string
 }
 
 function calcAge(birthDate: string | null): string {
@@ -46,8 +50,10 @@ export default function PetDetailPage() {
     const params = useParams()
     const petId = params.id as string
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const galleryInputRef = useRef<HTMLInputElement>(null)
 
     const [pet, setPet] = useState<Pet | null>(null)
+    const [petPhotos, setPetPhotos] = useState<PetPhoto[]>([])
     const [loading, setLoading] = useState(true)
     const [editing, setEditing] = useState(false)
     const [saving, setSaving] = useState(false)
@@ -56,6 +62,7 @@ export default function PetDetailPage() {
 
     // Photo upload state
     const [uploadingPhoto, setUploadingPhoto] = useState(false)
+    const [uploadingGallery, setUploadingGallery] = useState(false)
     const [photoHover, setPhotoHover] = useState(false)
     const [avatarKey, setAvatarKey] = useState(Date.now()) // force img re-render
 
@@ -65,6 +72,7 @@ export default function PetDetailPage() {
     const [editBreed, setEditBreed] = useState('')
     const [editBirth, setEditBirth] = useState('')
     const [editWeight, setEditWeight] = useState('')
+    const [editWantsToBreed, setEditWantsToBreed] = useState(false)
 
     const [userId, setUserId] = useState<string | null>(null)
 
@@ -81,12 +89,16 @@ export default function PetDetailPage() {
         setLoading(true)
         const { data, error } = await supabase.from('pets').select('*').eq('id', petId).single()
         if (error || !data) { router.push('/dashboard/pets'); return }
+        const { data: photos } = await supabase.from('pet_photos').select('*').eq('pet_id', petId).order('created_at', { ascending: true })
+        
+        setPetPhotos(photos || [])
         setPet(data)
         setEditName(data.name)
         setEditSpecies(data.species)
         setEditBreed(data.breed || '')
         setEditBirth(data.birth_date || '')
         setEditWeight(data.weight_kg?.toString() || '')
+        setEditWantsToBreed(data.wants_to_breed || false)
         setLoading(false)
     }
 
@@ -125,6 +137,40 @@ export default function PetDetailPage() {
         setUploadingPhoto(false)
     }
 
+    const handleGalleryPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !userId) return
+        if (file.size > 5 * 1024 * 1024) { alert('La foto debe ser menor a 5 MB.'); return }
+        if (petPhotos.length >= 5) { alert('Máximo 5 fotos permitidas.'); return }
+        
+        setUploadingGallery(true)
+        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        const fileName = `${Date.now()}.${ext}`
+        const path = `${userId}/${petId}/gallery/${fileName}`
+        
+        const { error: upErr } = await supabase.storage.from('pet-photos').upload(path, file, { contentType: file.type })
+        if (upErr) { alert('Error subiendo la foto: ' + upErr.message); setUploadingGallery(false); return }
+
+        const { data: { publicUrl } } = supabase.storage.from('pet-photos').getPublicUrl(path)
+
+        const { data: inserted, error: dbErr } = await supabase.from('pet_photos').insert({
+            pet_id: petId, photo_url: publicUrl
+        }).select().single()
+
+        if (dbErr) { alert('Error guardando la foto: ' + dbErr.message); setUploadingGallery(false); return }
+
+        setPetPhotos(prev => [...prev, inserted])
+        setUploadingGallery(false)
+    }
+
+    const handleDeleteGalleryPhoto = async (photoId: string, url: string) => {
+        if (!confirm('¿Eliminar esta foto?')) return
+        const pathMatch = url.split('/pet-photos/')[1]
+        if (pathMatch) await supabase.storage.from('pet-photos').remove([pathMatch])
+        await supabase.from('pet_photos').delete().eq('id', photoId)
+        setPetPhotos(prev => prev.filter(p => p.id !== photoId))
+    }
+
     // ── Save edit ─────────────────────────────────────────────────────────────
     const handleSave = async () => {
         if (!editName.trim()) return
@@ -135,6 +181,7 @@ export default function PetDetailPage() {
             breed: editBreed.trim() || null,
             birth_date: editBirth || null,
             weight_kg: editWeight ? parseFloat(editWeight) : null,
+            wants_to_breed: editWantsToBreed,
         }).eq('id', petId).select().single()
         if (error) { setError(error.message); setSaving(false); return }
         setPet(data)
@@ -195,6 +242,13 @@ export default function PetDetailPage() {
                 accept="image/jpeg,image/png,image/webp"
                 style={{ display: 'none' }}
                 onChange={handlePhotoChange}
+            />
+            <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={handleGalleryPhotoChange}
             />
 
             <main className="dashboard-main" style={{ overflowY: 'auto' }}>
@@ -386,6 +440,26 @@ export default function PetDetailPage() {
                                 </div>
                             </div>
 
+                            {/* Tinder / Montas Option */}
+                            <div style={{ marginBottom: 24, padding: '18px', background: 'rgba(255,107,107,0.05)', border: '1px solid rgba(255,107,107,0.2)', borderRadius: 12 }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={editWantsToBreed} 
+                                        onChange={e => setEditWantsToBreed(e.target.checked)}
+                                        style={{ width: 18, height: 18, accentColor: '#FF6B6B' }}
+                                    />
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#FF6B6B' }}>
+                                            🔥 Disponible para Match (Montas)
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', color: 'rgba(248,248,255,0.5)', marginTop: 4 }}>
+                                            Activa esta opción para que otras mascotas puedan hacer Match. Requisitos: Al menos 3 fotos en total de la mascota.
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
                             {error && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '10px 14px', color: '#EF4444', fontSize: '0.84rem', marginBottom: 16 }}>⚠️ {error}</div>}
 
                             <div style={{ display: 'flex', gap: 10 }}>
@@ -430,6 +504,55 @@ export default function PetDetailPage() {
                             ))}
                         </div>
                     )}
+
+                    {/* Photo Gallery (Available in both modes) */}
+                    <div style={{
+                        background: 'rgba(13,13,25,0.7)', border: '1px solid rgba(108,63,245,0.1)',
+                        borderRadius: 16, padding: '24px', marginBottom: 28
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                            <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.1rem', margin: 0 }}>
+                                📸 Galería de fotos ({petPhotos.length}/5)
+                            </h3>
+                            {editing && petPhotos.length < 5 && (
+                                <button onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} style={{
+                                    padding: '6px 14px', borderRadius: 8, background: 'rgba(108,63,245,0.15)',
+                                    border: '1px solid rgba(108,63,245,0.3)', color: '#6C3FF5',
+                                    fontSize: '0.8rem', fontWeight: 700, cursor: uploadingGallery ? 'wait' : 'pointer',
+                                }}>
+                                    {uploadingGallery ? '⏳' : '+ Añadir foto'}
+                                </button>
+                            )}
+                        </div>
+                        
+                        {petPhotos.length === 0 ? (
+                            <p style={{ color: 'rgba(248,248,255,0.3)', fontSize: '0.85rem', margin: 0 }}>No hay fotos en la galería todavía.</p>
+                        ) : (
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                                {petPhotos.map(photo => (
+                                    <div key={photo.id} style={{ position: 'relative', width: 90, height: 90, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(108,63,245,0.2)' }}>
+                                        <img src={photo.photo_url} alt="Pet photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        {editing && (
+                                            <button 
+                                                onClick={() => handleDeleteGalleryPhoto(photo.id, photo.photo_url)}
+                                                style={{
+                                                    position: 'absolute', top: 4, right: 4, background: 'rgba(239,68,68,0.9)',
+                                                    border: 'none', color: 'white', width: 22, height: 22, borderRadius: '50%',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '0.65rem', cursor: 'pointer',
+                                                }}
+                                            >✖</button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {!editing && pet.wants_to_breed && (petPhotos.length + (pet.avatar_url ? 1 : 0) < 3) && (
+                            <div style={{ marginTop: 12, color: '#FF6B6B', fontSize: '0.8rem', fontWeight: 600 }}>
+                                ⚠️ Faltan fotos. Necesitas al menos 3 fotos (incluyendo la foto de perfil) para aparecer en Match (Montas).
+                            </div>
+                        )}
+                    </div>
 
                     {/* Quick links */}
                     {!editing && (

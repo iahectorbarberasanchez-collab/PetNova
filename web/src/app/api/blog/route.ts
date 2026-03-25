@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
             content,
             excerpt,
             cover_image_url,
-            author = 'PetNexa Team',
+            author = 'PetNova Team',
             category = 'Consejos',
             tags = [],
             slug: customSlug,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
             post: {
                 id: data.id,
                 slug: data.slug,
-                url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://petnexa.com'}/blog/${data.slug}`,
+                url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://PetNova.com'}/blog/${data.slug}`,
             },
         }, { status: 201 })
 

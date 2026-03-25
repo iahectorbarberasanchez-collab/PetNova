@@ -94,7 +94,7 @@ export default function ServicesClient() {
                 <PageHeader
                     title="Servicios para tu Mascota"
                     emoji="🐾"
-                    subtitle="Paseadores, cuidadores, adiestradores y más — todos verificados por PetNexa"
+                    subtitle="Paseadores, cuidadores, adiestradores y más — todos verificados por PetNova"
                     action={
                         <Link href="/dashboard/services/new" className="px-6 py-3 rounded-xl bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] text-white font-outfit font-bold text-[0.88rem] no-underline shadow-lg shadow-[#6C3FF5]/30 hover:shadow-[#6C3FF5]/50 hover:-translate-y-0.5 transition-all flex items-center gap-2">
                             <span>➕ Ofrecer mis servicios</span>
@@ -216,7 +216,7 @@ export default function ServicesClient() {
                             const minPrice = getMinPrice(p)
                             const cats = getCategories(p)
                             const avatar = DEMO_AVATARS[p.id]
-                            const name = p.profiles?.full_name || 'Profesional PetNexa'
+                            const name = p.profiles?.full_name || 'Profesional PetNova'
 
                             return (
                                 <div

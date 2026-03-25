@@ -82,7 +82,7 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
         fontSize: '0.9rem', outline: 'none', fontFamily: 'Inter, sans-serif',
     }
 
-    const name = provider.profiles?.full_name || 'Profesional PetNexa'
+    const name = provider.profiles?.full_name || 'Profesional PetNova'
     const avatar = DEMO_AVATARS[provider.id]
     const cats = [...new Set(provider.services.map(s => s.service_type))]
 
@@ -154,7 +154,7 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
 
                         <div style={{ marginTop: 24, background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.15)', borderRadius: 12, padding: '12px 14px' }}>
                             <p style={{ fontSize: '0.78rem', color: 'rgba(0,212,255,0.7)', margin: 0, lineHeight: 1.6 }}>
-                                🛡️ <strong>Pagos seguros PetNexa:</strong> Tu dinero está protegido hasta que el servicio se complete.
+                                🛡️ <strong>Pagos seguros PetNova:</strong> Tu dinero está protegido hasta que el servicio se complete.
                             </p>
                         </div>
                     </div>
@@ -229,7 +229,7 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
                                 <div style={{ fontSize: '3.5rem', marginBottom: 16 }}>🎉</div>
                                 <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.4rem', marginBottom: 10 }}>¡Solicitud enviada!</h2>
                                 <p style={{ color: 'rgba(248,248,255,0.6)', lineHeight: 1.6 }}>
-                                    {name} recibirá tu reserva y te confirmará en breve por PetNexa.
+                                    {name} recibirá tu reserva y te confirmará en breve por PetNova.
                                 </p>
                             </div>
                         ) : (

@@ -253,7 +253,7 @@ export default function NewProviderPage() {
                             <div style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.14)', borderRadius: 12, padding: '13px 16px', marginBottom: 20, display: 'flex', gap: 10 }}>
                                 <span style={{ fontSize: 16, flexShrink: 0 }}>ℹ️</span>
                                 <p style={{ fontSize: '0.8rem', color: 'rgba(0,212,255,0.65)', lineHeight: 1.6, margin: 0 }}>
-                                    Tu perfil será visible inmediatamente. El <strong>sello de Verificado</strong> se otorga tras revisión del equipo PetNexa (24–48h).
+                                    Tu perfil será visible inmediatamente. El <strong>sello de Verificado</strong> se otorga tras revisión del equipo PetNova (24–48h).
                                 </p>
                             </div>
 

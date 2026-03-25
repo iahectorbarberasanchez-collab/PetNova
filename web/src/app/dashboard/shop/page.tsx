@@ -104,7 +104,7 @@ export default function ShopPage() {
                     <div className="mb-10">
                         <Breadcrumbs items={[{ label: 'Tienda' }]} />
                         <h1 className="font-['Outfit',_sans-serif] font-extrabold text-[2.5rem] mb-4">
-                            PetNexa <span className="bg-gradient-to-br from-[#F59E0B] to-[#FF6B9D] bg-clip-text text-transparent">Marketplace</span>
+                            PetNova <span className="bg-gradient-to-br from-[#F59E0B] to-[#FF6B9D] bg-clip-text text-transparent">Marketplace</span>
                         </h1>
                         <p className="text-[rgba(248,248,255,0.6)] text-[1rem] leading-relaxed max-w-[600px]">
                             Descubre una selección premium de productos, alimentación y juguetes curados por nuestra comunidad.
