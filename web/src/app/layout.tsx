@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -6,14 +6,6 @@ export const metadata: Metadata = {
   description: 'La plataforma definitiva para dueños de mascotas. Cartilla médica, red social, alertas y mucho más.',
   keywords: ['mascotas', 'perros', 'gatos', 'veterinario', 'cuidado animal', 'PetNova'],
   manifest: '/manifest.json',
-  themeColor: '#6C3FF5',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -36,6 +28,15 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-status-bar-style': 'black-translucent',
     'mobile-web-app-capable': 'yes',
   }
+}
+
+export const viewport: Viewport = {
+  themeColor: '#6C3FF5',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 }
 
 import PWAHandler from '@/components/PWAHandler'
