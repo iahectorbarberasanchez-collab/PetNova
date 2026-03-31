@@ -48,7 +48,7 @@ export default function DashboardPage() {
             <main className="dashboard-main lg:ml-[260px] relative min-h-screen">
                 <div className="noise-overlay pointer-events-none" />
                 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[80px] pb-[120px] lg:pt-8 lg:pb-8">
                     <PageHeader
                         title={`¡Hola de nuevo, ${displayName}!`}
                         subtitle={today}
@@ -63,7 +63,7 @@ export default function DashboardPage() {
                     {/* Quick Stats */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
                         {metrics.map((m, i) => (
-                            <StatCard key={i} {...m} delay={i * 0.1} />
+                            <StatCard key={m.label} {...m} delay={i * 0.1} />
                         ))}
                     </div>
 
@@ -75,7 +75,7 @@ export default function DashboardPage() {
                             {/* Proactive Tip / PetBot AI */}
                             {pets.length > 0 && (
                                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
-                                    <ProactiveTip pet={pets[0] as any} />
+                                    <ProactiveTip pet={pets[0]} />
                                 </motion.div>
                             )}
                         </div>

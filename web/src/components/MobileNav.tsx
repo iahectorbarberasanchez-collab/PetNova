@@ -8,6 +8,11 @@ import { Home, PawPrint, Activity, Briefcase, Settings } from 'lucide-react'
 export default function MobileNav() {
   const pathname = usePathname()
 
+  const isLandingPage = pathname === '/'
+  const isAuthPage = pathname === '/auth'
+  
+  if (isLandingPage || isAuthPage) return null
+
   const navItems = [
     { icon: <Home size={20} />, label: 'Inicio', href: '/dashboard' },
     { icon: <PawPrint size={20} />, label: 'Mascotas', href: '/dashboard/pets' },

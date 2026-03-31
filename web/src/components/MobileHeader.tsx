@@ -1,30 +1,40 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 
 export default function MobileHeader() {
+  const pathname = usePathname()
   const supabase = createClient()
   const [petCoins, setPetCoins] = useState<number | null>(null)
 
+  const isLandingPage = pathname === '/'
+
   useEffect(() => {
+    if (isLandingPage) return
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         const { data } = await supabase.from('profiles').select('pet_coins').eq('id', user.id).single()
         if (data) setPetCoins(data.pet_coins)
       }
     })
-  }, [])
+  }, [isLandingPage])
+
+  if (isLandingPage) return null
 
   return (
     <header className="lg:hidden fixed top-0 left-0 right-0 z-50 px-4 pt-[env(safe-area-inset-top,1rem)] pb-4 bg-[rgba(8,8,18,0.7)] backdrop-blur-xl border-b border-[rgba(108,63,245,0.15)] flex items-center justify-between">
       <Link href="/dashboard" className="flex items-center gap-2">
-        <img 
-          src="/logo.png" 
-          alt="PetNova Logo" 
-          className="w-8 h-8 rounded-lg shadow-lg shadow-[#6C3FF5]/40 object-cover"
+        <Image
+          src="/logo.png"
+          alt="PetNova Logo"
+          width={32}
+          height={32}
+          className="rounded-lg shadow-lg shadow-[#6C3FF5]/40 object-cover"
         />
         <span className="font-outfit font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
           PetNova

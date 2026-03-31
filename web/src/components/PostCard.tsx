@@ -28,16 +28,18 @@ function timeAgo(dateStr: string): string {
 export function PostCard({ post, userId, onLike, onDelete, onFetchComments, onAddComment }: PostCardProps) {
   const [openComments, setOpenComments] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
+  const [commentsFetched, setCommentsFetched] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [submittingComment, setSubmittingComment] = useState(false)
   const [loadingComments, setLoadingComments] = useState(false)
 
   const handleToggleComments = async () => {
-    if (!openComments) {
+    if (!openComments && !commentsFetched) {
       setLoadingComments(true)
       try {
         const data = await onFetchComments(post.id)
         setComments(data)
+        setCommentsFetched(true)
       } catch (error) {
         console.error('Error loading comments:', error)
       } finally {
@@ -114,8 +116,8 @@ export function PostCard({ post, userId, onLike, onDelete, onFetchComments, onAd
 
       {/* Content */}
       {post.caption && (
-        <div className="px-6 py-5">
-          <p className="text-[1.02rem] leading-relaxed text-white/85 font-inter">
+        <div className="px-5 md:px-6 py-4 md:py-5">
+          <p className="text-[0.95rem] md:text-[1.02rem] leading-relaxed text-white/85 font-inter">
             {post.caption}
           </p>
         </div>

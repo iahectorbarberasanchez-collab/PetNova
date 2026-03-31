@@ -21,10 +21,20 @@
 }
 
 /* Base body settings */
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     background-color: #07070F;
     color: #F8F8FF;
     overflow-x: hidden;
+}
+
+/* Accessibility: Focus visible rings */
+:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 4px;
 }
 
 /* Dashboard Layout — sidebar is position:fixed so we use margin-left */

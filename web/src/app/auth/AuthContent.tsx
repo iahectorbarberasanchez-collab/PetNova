@@ -38,42 +38,41 @@ export function AuthContent() {
         }
     }, [searchParams])
 
+    const getCallbackUrl = () => refCode
+        ? `${window.location.origin}/auth/callback?ref=${refCode}`
+        : `${window.location.origin}/auth/callback`
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true); setError(null); setSuccess(null)
-
-        if (mode === 'signup') {
-            const callbackUrl = refCode
-                ? `${window.location.origin}/auth/callback?ref=${refCode}`
-                : `${window.location.origin}/auth/callback`
-
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: { full_name: name },
-                    emailRedirectTo: callbackUrl,
-                },
-            })
-            if (error) setError(error.message)
-            else setSuccess('¡Revisa tu email para confirmar tu cuenta! 🐾')
-        } else {
-            const { error } = await supabase.auth.signInWithPassword({ email, password })
-            if (error) setError(error.message)
-            else router.push('/dashboard')
+        try {
+            if (mode === 'signup') {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: name },
+                        emailRedirectTo: getCallbackUrl(),
+                    },
+                })
+                if (error) setError(error.message)
+                else setSuccess('¡Revisa tu email para confirmar tu cuenta! 🐾')
+            } else {
+                const { error } = await supabase.auth.signInWithPassword({ email, password })
+                if (error) setError(error.message)
+                else router.push('/dashboard')
+            }
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     const handleGoogle = async () => {
         setGoogleLoading(true); setError(null)
-        const callbackUrl = refCode
-            ? `${window.location.origin}/auth/callback?ref=${refCode}`
-            : `${window.location.origin}/auth/callback`
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: callbackUrl,
+                redirectTo: getCallbackUrl(),
                 queryParams: { access_type: 'offline', prompt: 'consent' },
             },
         })
@@ -85,7 +84,7 @@ export function AuthContent() {
     return (
         <div style={{
             minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            position: 'relative', overflow: 'hidden', padding: '24px',
+            position: 'relative', overflow: 'hidden', padding: '24px', paddingBottom: '60px',
             background: '#07070F',
         }}>
             <motion.div

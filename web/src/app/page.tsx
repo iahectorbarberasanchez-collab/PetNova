@@ -65,7 +65,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen relative overflow-hidden bg-[#07070F]">
       {/* Ambient orbs */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div className="absolute w-[800px] h-[800px] rounded-full top-[-200px] right-[-200px]" style={{ background: 'radial-gradient(circle, rgba(108,63,245,0.15) 0%, transparent 70%)' }} />
         <div className="absolute w-[600px] h-[600px] rounded-full bottom-0 left-[-150px]" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%)' }} />
         <div className="absolute w-[400px] h-[400px] rounded-full top-[40%] left-[30%]" style={{ background: 'radial-gradient(circle, rgba(108,63,245,0.08) 0%, transparent 70%)' }} />
@@ -80,13 +80,13 @@ export default function HomePage() {
           </span>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
-          <Link href="/blog" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] border border-[rgba(108,63,245,0.25)] text-[rgba(248,248,255,0.8)] font-['Outfit',_sans-serif] font-semibold text-[0.88rem] no-underline transition-all duration-200 bg-transparent hover:bg-white/5 hover:text-white">
+          <Link href="/blog" aria-label="Ir al blog" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] border border-[rgba(108,63,245,0.25)] text-[rgba(248,248,255,0.8)] font-['Outfit',_sans-serif] font-semibold text-[0.88rem] no-underline transition-all duration-200 bg-transparent hover:bg-white/5 hover:text-white">
             📝 <span className="hidden sm:inline">Blog</span>
           </Link>
-          <Link href="/auth" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] border border-[rgba(108,63,245,0.25)] text-[rgba(248,248,255,0.8)] font-['Outfit',_sans-serif] font-semibold text-[0.88rem] no-underline transition-all duration-200 bg-transparent hover:bg-white/5 hover:text-white">
+          <Link href="/auth" aria-label="Iniciar sesión" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] border border-[rgba(108,63,245,0.25)] text-[rgba(248,248,255,0.8)] font-['Outfit',_sans-serif] font-semibold text-[0.88rem] no-underline transition-all duration-200 bg-transparent hover:bg-white/5 hover:text-white">
             Entrar
           </Link>
-          <Link href="/auth" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] text-white font-['Outfit',_sans-serif] font-bold text-[0.88rem] no-underline shadow-[0_4px_20px_rgba(108,63,245,0.4)] transition-all duration-200 hover:scale-105 hover:shadow-[0_6px_25px_rgba(108,63,245,0.5)]">
+          <Link href="/auth" aria-label="Empezar gratis" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] text-white font-['Outfit',_sans-serif] font-bold text-[0.88rem] no-underline shadow-[0_4px_20px_rgba(108,63,245,0.4)] transition-all duration-200 hover:scale-105 hover:shadow-[0_6px_25px_rgba(108,63,245,0.5)]">
             <span className="hidden sm:inline">Empezar Gratis</span> →
           </Link>
         </div>
@@ -121,10 +121,10 @@ export default function HomePage() {
         </div>
 
         {/* Floating pet emojis */}
-        <div className="flex flex-wrap gap-[14px] justify-center mb-[80px]">
-          {pets.map((p, i) => (
+        <div className="flex flex-wrap gap-[10px] md:gap-[14px] justify-center mb-[80px]" aria-hidden="true">
+          {pets.slice(0, 10).map((p, i) => (
             <div key={i}
-              className="w-[58px] h-[58px] rounded-[16px] flex items-center justify-center text-[26px] bg-[rgba(255,255,255,0.03)] border border-[rgba(108,63,245,0.18)] backdrop-blur-md shadow-[0_4px_20px_rgba(108,63,245,0.1)]"
+              className={`w-[48px] h-[48px] md:w-[58px] md:h-[58px] rounded-[16px] flex items-center justify-center text-[22px] md:text-[26px] bg-[rgba(255,255,255,0.03)] border border-[rgba(108,63,245,0.18)] backdrop-blur-md shadow-[0_4px_20px_rgba(108,63,245,0.1)] ${i >= 6 ? 'hidden sm:flex' : 'flex'}`}
               style={{
                 animation: `float ${3.2 + (i * 0.35)}s ease-in-out infinite`,
                 animationDelay: `${i * 0.18}s`,
@@ -137,7 +137,7 @@ export default function HomePage() {
         {/* Stats bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 max-w-[680px] mx-auto bg-[rgba(17,17,32,0.6)] backdrop-blur-xl border border-[rgba(108,63,245,0.15)] rounded-[20px] overflow-hidden">
           {stats.map((s, i) => (
-            <div key={i} className={`text-center py-[24px] px-[16px] ${i < stats.length - 1 ? 'sm:border-r border-[rgba(108,63,245,0.1)]' : ''} ${(i === 0 || i === 1) ? 'border-b sm:border-b-0 border-[rgba(108,63,245,0.1)]' : ''} ${(i === 0 || i === 2) ? 'border-r sm:border-r border-[rgba(108,63,245,0.1)]' : ''}`}>
+            <div key={s.label} className={`text-center py-[24px] px-[16px] ${i < stats.length - 1 ? 'sm:border-r border-[rgba(108,63,245,0.1)]' : ''} ${(i === 0 || i === 1) ? 'border-b sm:border-b-0 border-[rgba(108,63,245,0.1)]' : ''} ${(i === 0 || i === 2) ? 'border-r sm:border-r border-[rgba(108,63,245,0.1)]' : ''}`}>
               <div className="text-[20px] mb-[6px]">{s.icon}</div>
               <div className="text-[1.9rem] font-['Outfit',_sans-serif] font-black bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent leading-none">{s.value}</div>
               <div className="text-[0.78rem] text-[rgba(248,248,255,0.6)] mt-[6px] font-medium">{s.label}</div>
@@ -159,8 +159,8 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[22px]">
-          {features.map((f, i) => (
-            <div key={i} className="bg-[rgba(15,15,28,0.7)] backdrop-blur-xl border border-[rgba(108,63,245,0.14)] rounded-[22px] p-[28px] transition-all duration-300 relative overflow-hidden group hover:-translate-y-1 hover:border-[rgba(108,63,245,0.3)] hover:bg-[rgba(15,15,28,0.9)]">
+          {features.map((f) => (
+            <div key={f.title} className="bg-[rgba(15,15,28,0.7)] backdrop-blur-xl border border-[rgba(108,63,245,0.14)] rounded-[22px] p-[28px] transition-all duration-300 relative overflow-hidden group hover:-translate-y-1 hover:border-[rgba(108,63,245,0.3)] hover:bg-[rgba(15,15,28,0.9)]">
               <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-300 opacity-60 group-hover:opacity-100" style={{ background: `radial-gradient(circle at top left, ${f.glow} 0%, transparent 60%)` }} />
               <div className="relative z-10">
                 <div className="w-[54px] h-[54px] rounded-[15px] flex items-center justify-center text-[26px] mb-5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
