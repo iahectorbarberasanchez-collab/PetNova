@@ -1,6 +1,6 @@
 # Plan de Creación y Publicación: La SuperApp Definitiva para Mascotas
 
-Este documento centraliza todas las ideas, requerimientos y pasos a seguir para construir y publicar PetNexa, la aplicación de referencia mundial para dueños de mascotas.
+Este documento centraliza todas las ideas, requerimientos y pasos a seguir para construir y publicar PetNova, la aplicación de referencia mundial para dueños de mascotas.
 
 ---
 
@@ -48,7 +48,7 @@ Para que el proyecto sea rentable y sostenible, plantearemos un modelo de ingres
 
 La descarga y el uso básico (cartilla, social, alertas) siempre serán **GRATIS** para atraer a una gran masa de usuarios.
 
-* **Suscripción "PetNexa Premium"**:
+* **Suscripción "PetNova Premium"**:
   * Consultas ilimitadas o con descuento con veterinarios online (Telemedicina).
   * Uso ilimitado del asistente de Inteligencia Artificial (PetBot).
   * Perfiles destacados en las búsquedas (ej. si buscas cruzamientos o playdates).
@@ -64,7 +64,7 @@ La descarga y el uso básico (cartilla, social, alertas) siempre serán **GRATIS
 * Marcas de alimentación, juguetes o farmacéuticas para animales pueden pagar por mostrar **publicidad hiper-segmentada**. Por ejemplo, si un usuario tiene un "Gato Persa con sobrepeso", se le puede mostrar un anuncio nativo de un pienso dietético para gatos.
 * Marcas de alimentación, juguetes o farmacéuticas para animales pueden pagar por mostrar **publicidad hiper-segmentada**. Por ejemplo, si un usuario tiene un "Gato Persa con sobrepeso", se le puede mostrar un anuncio nativo de un pienso dietético para gatos.
 
-#### 📦 3.4 Comercio Electrónico Directo ("PetNexa Boxes")
+#### 📦 3.4 Comercio Electrónico Directo ("PetNova Boxes")
 
 * **Cajas de Suscripción Mensual**: Los usuarios pueden suscribirse para recibir una caja sorpresa mensual (con juguetes, premios y accesorios) adaptada a la especie, tamaño y alergias documentadas de su mascota en su perfil.
 
@@ -72,7 +72,7 @@ La descarga y el uso básico (cartilla, social, alertas) siempre serán **GRATIS
 
 * **Sistema "PetCoins" (Economía Gamificada)**: Los usuarios acumulan PetCoins por acciones que den valor a la comunidad (registrar paseos diarios, llevar al día las vacunas en la cartilla, invitar a amigos o ayudar a compartir alertas de mascotas perdidas).
 * **Incentivos para canjear PetCoins**:
-  * **Descuentos en el Mundo Real**: Canjear puntos por cupones de descuento (ej. -10%, -20%) en sacos de pienso, collares o seguros médicos dentro de nuestro Marketplace (o en tiendas asociadas "PetNexa Friendly").
+  * **Descuentos en el Mundo Real**: Canjear puntos por cupones de descuento (ej. -10%, -20%) en sacos de pienso, collares o seguros médicos dentro de nuestro Marketplace (o en tiendas asociadas "PetNova Friendly").
   * **Beneficios en Servicios**: Pago parcial de sesiones de peluquería, adiestramiento o guardería con paseadores de la plataforma.
   * **Entradas Exclusivas**: Acceso gratuito a ferias de mascotas locales o eventos organizados por la app.
   * **Mascota VIP**: Desbloqueo temporal de "Súper Likes", avatares de temporada (Navidad, Halloween) o mayor visibilidad del perfil de la mascota por unos días.
@@ -81,7 +81,7 @@ La descarga y el uso básico (cartilla, social, alertas) siempre serán **GRATIS
 
 * **Estudios de Mercado para Marcas**: Al registrar masivamente qué comen las mascotas, qué enfermedades sufren según razas y qué edad tienen, poseemos una base de datos invaluable. Se pueden vender informes estadísticos y predictivos **totalmente anonimizados** (sin datos personales del dueño) a farmacéuticas o grandes marcas de alimentación animal.
 
-#### 🏅 3.7 Certificación Oficial "PetNexa Friendly"
+#### 🏅 3.7 Certificación Oficial "PetNova Friendly"
 
 * Vender a restaurantes, hoteles y cafeterías una "certificación o sello físico" para poner en la puerta de su local, indicando que son lugares auditados y aprobados por la comunidad de la app. Incluye packs de marketing y estar siempre en la primera página de búsquedas del mapa.
 

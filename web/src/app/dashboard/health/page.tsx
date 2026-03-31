@@ -1,67 +1,39 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import {
     Plus,
     Trash2,
     Calendar,
-    Clock,
     Stethoscope,
-    Syringe,
-    Bug,
-    CheckCircle2,
     AlertCircle,
-    Pill,
-    Activity,
-    Scissors,
+    CheckCircle2,
     ClipboardList,
     Filter,
-    X,
-    ChevronRight,
-    Search,
+    Clock,
     PawPrint
 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
-
-// ── Types ────────────────────────────────────────────────────────────────────
-interface Pet { id: string; name: string; species: string }
-
-interface HealthRecord {
-    id: string
-    pet_id: string
-    record_type: string
-    title: string
-    date_administered: string
-    next_due_date: string | null
-    notes: string | null
-    created_at: string
-}
+import { usePets } from '@/hooks/usePets'
+import { useHealthRecords } from '@/hooks/useHealthRecords'
+import { HealthRecordModal } from '@/components/HealthRecordModal'
+import { ProactiveTip } from '@/components/ui/ProactiveTip'
+import { useUser } from '@/hooks/useUser'
+import { HealthRecord } from '@/lib/types'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const RECORD_TYPES = [
-    { value: 'vaccine', label: 'Vacuna', icon: Syringe, color: '#6C3FF5' },
-    { value: 'deworming', label: 'Desparasitación', icon: Bug, color: '#F97316' },
-    { value: 'checkup', label: 'Revisión', icon: Stethoscope, color: '#00D4FF' },
-    { value: 'medication', label: 'Medicación', icon: Pill, color: '#EC4899' },
-    { value: 'surgery', label: 'Cirugía / Prueba', icon: Activity, color: '#EF4444' },
-    { value: 'grooming', label: 'Peluquería', icon: Scissors, color: '#10B981' },
-    { value: 'other', label: 'Otro', icon: ClipboardList, color: '#A78BFA' },
-]
-
 const TYPE_META: Record<string, { label: string; color: string; icon: any }> = {
-    vaccine: { label: 'Vacuna', color: '#6C3FF5', icon: Syringe },
-    deworming: { label: 'Desparasitación', color: '#F97316', icon: Bug },
+    vaccine: { label: 'Vacuna', color: '#6C3FF5', icon: Stethoscope },
+    deworming: { label: 'Desparasitación', color: '#F97316', icon: Stethoscope },
     checkup: { label: 'Revisión', color: '#00D4FF', icon: Stethoscope },
-    medication: { label: 'Medicación', color: '#EC4899', icon: Pill },
-    surgery: { label: 'Cirugía / Prueba', color: '#EF4444', icon: Activity },
-    grooming: { label: 'Peluquería', color: '#10B981', icon: Scissors },
+    medication: { label: 'Medicación', color: '#EC4899', icon: Stethoscope },
+    surgery: { label: 'Cirugía / Prueba', color: '#EF4444', icon: Stethoscope },
+    grooming: { label: 'Peluquería', color: '#10B981', icon: Stethoscope },
     other: { label: 'Otro', color: '#A78BFA', icon: ClipboardList },
 }
 
@@ -76,86 +48,15 @@ function daysUntil(d: string) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function HealthPage() {
-    const supabase = createClient()
-    const router = useRouter()
-
-    const [pets, setPets] = useState<Pet[]>([])
-    const [records, setRecords] = useState<HealthRecord[]>([])
+    const { userId } = useUser()
+    const { pets, loading: petsLoading } = usePets(userId)
     const [selectedPetId, setSelectedPetId] = useState<string>('all')
-    const [loading, setLoading] = useState(true)
-    const [deleting, setDeleting] = useState<string | null>(null)
+    const { records, loading: recordsLoading, addRecord, deleteRecord } = useHealthRecords(selectedPetId)
+    
     const [showModal, setShowModal] = useState(false)
-    const [petbotTip, setPetbotTip] = useState<string | null>(null)
-    const [tipLoading, setTipLoading] = useState(false)
+    const [deleting, setDeleting] = useState<string | null>(null)
 
-    // Form state
-    const [fPetId, setFPetId] = useState('')
-    const [fType, setFType] = useState('vaccine')
-    const [fTitle, setFTitle] = useState('')
-    const [fDate, setFDate] = useState(new Date().toISOString().split('T')[0])
-    const [fNextDate, setFNextDate] = useState('')
-    const [fNotes, setFNotes] = useState('')
-    const [fSaving, setFSaving] = useState(false)
-    const [fError, setFError] = useState<string | null>(null)
-
-    // ── Load ────────────────────────────────────────────────────────────────────
-    useEffect(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (!user) { router.push('/auth'); return }
-            loadAll(user.id)
-        })
-    }, [])
-
-    const loadAll = async (userId: string) => {
-        setLoading(true)
-        // Fetch user's pets with correct column names from schema
-        const { data: petsData } = await supabase
-            .from('pets')
-            .select('id, name, species, breed, birth_date, weight_kg')
-            .eq('owner_id', userId)
-            .order('created_at')
-
-        if (petsData) {
-            setPets(petsData)
-            if (petsData.length > 0 && !fPetId) setFPetId(petsData[0].id)
-            // Load PetBot IQ tip for first pet
-            if (petsData.length > 0) loadPetbotTip(petsData[0])
-        }
-
-        // health_records has no owner_id: filter by pet_ids belonging to user
-        if (petsData && petsData.length > 0) {
-            const petIds = petsData.map(p => p.id)
-            const { data: recData } = await supabase
-                .from('health_records')
-                .select('*')
-                .in('pet_id', petIds)
-                .order('date_administered', { ascending: false })
-            if (recData) setRecords(recData)
-        }
-        setLoading(false)
-    }
-
-    const loadPetbotTip = async (pet: any) => {
-        setTipLoading(true)
-        try {
-            const res = await fetch('/api/petbot/tip', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ petContext: pet })
-            })
-            const data = await res.json()
-            if (data.tip) setPetbotTip(data.tip)
-        } catch {
-            // silently fail – show static tip
-        } finally {
-            setTipLoading(false)
-        }
-    }
-
-    // ── Filtered records ────────────────────────────────────────────────────────
-    const filtered = selectedPetId === 'all'
-        ? records
-        : records.filter(r => r.pet_id === selectedPetId)
+    const loading = petsLoading || recordsLoading
 
     // Upcoming reminders: next_due_date in the future
     const upcoming = records
@@ -163,36 +64,25 @@ export default function HealthPage() {
         .sort((a, b) => new Date(a.next_due_date!).getTime() - new Date(b.next_due_date!).getTime())
         .slice(0, 4)
 
-    // ── Delete ──────────────────────────────────────────────────────────────────
     const handleDelete = async (id: string, title: string) => {
         if (!confirm(`¿Eliminar "${title}"?`)) return
         setDeleting(id)
-        await supabase.from('health_records').delete().eq('id', id)
-        setRecords(prev => prev.filter(r => r.id !== id))
-        setDeleting(null)
+        try {
+            await deleteRecord(id)
+        } catch (error) {
+            console.error('Error deleting record:', error)
+            alert('Error al eliminar el registro')
+        } finally {
+            setDeleting(null)
+        }
     }
 
-    // ── Submit ──────────────────────────────────────────────────────────────────
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!fPetId) { setFError('Selecciona una mascota.'); return }
-        setFSaving(true); setFError(null)
-        const { data, error } = await supabase.from('health_records').insert({
-            pet_id: fPetId,
-            record_type: fType,
-            title: fTitle.trim(),
-            date_administered: fDate,
-            next_due_date: fNextDate || null,
-            notes: fNotes.trim() || null,
-        }).select().single()
-        if (error) { setFError(error.message); setFSaving(false); return }
-        setRecords(prev => [data, ...prev])
-        setShowModal(false)
-        setFTitle(''); setFType('vaccine'); setFNextDate(''); setFNotes('')
-        setFSaving(false)
+    const handleSave = async (recordData: Omit<HealthRecord, 'id' | 'created_at'>) => {
+        await addRecord(recordData)
     }
 
-    // ── Render ──────────────────────────────────────────────────────────────────
+    const firstPet = pets[0]
+
     return (
         <div className="dashboard-container">
             <Sidebar />
@@ -224,6 +114,14 @@ export default function HealthPage() {
                         </div>
                     }
                 />
+
+                {/* Loading state */}
+                {loading && (
+                    <div className="flex items-center justify-center p-20 text-white/40">
+                        <div className="animate-spin mr-3"><Clock size={24} /></div>
+                        Cargando cartilla...
+                    </div>
+                )}
 
                 {/* Empty state – no pets */}
                 {!loading && pets.length === 0 && (
@@ -259,11 +157,11 @@ export default function HealthPage() {
                         <div className="lg:col-span-8">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
-                                    <Clock size={14} /> HISTORIAL — {filtered.length} REGISTROS
+                                    <Clock size={14} /> HISTORIAL — {records.length} REGISTROS
                                 </h3>
                             </div>
 
-                            {filtered.length === 0 && (
+                            {records.length === 0 && (
                                 <GlassCard className="p-12 text-center border-dashed border-white/10 flex flex-col items-center">
                                     <ClipboardList size={40} className="text-white/20 mb-4" />
                                     <h4 className="text-lg font-bold mb-2">Sin registros aún</h4>
@@ -274,11 +172,11 @@ export default function HealthPage() {
                             )}
 
                             <div className="relative space-y-4">
-                                {filtered.length > 0 && (
+                                {records.length > 0 && (
                                     <div className="absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 to-transparent opacity-20 hidden md:block" />
                                 )}
                                 <AnimatePresence mode="popLayout">
-                                    {filtered.map((rec, idx) => {
+                                    {records.map((rec, idx) => {
                                         const meta = TYPE_META[rec.record_type] || TYPE_META.other
                                         const pet = pets.find(p => p.id === rec.pet_id)
                                         const isDel = deleting === rec.id
@@ -429,180 +327,20 @@ export default function HealthPage() {
                             </div>
 
                             {/* Proactive Tip Card */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 }}
-                            >
-                                <GlassCard className="p-7 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border-primary/30 relative overflow-hidden group">
-                                    <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700" />
-                                    <h4 className="flex items-center gap-2 font-black text-xs uppercase tracking-[0.2em] mb-4 text-primary-light">
-                                        <Activity size={16} className="animate-pulse" /> PetBot IQ Advise
-                                    </h4>
-                                    {tipLoading ? (
-                                        <div className="flex items-center gap-3 text-white/40">
-                                            <div className="w-5 h-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                                            <span className="text-sm font-medium tracking-wide">Analizando datos biométricos...</span>
-                                        </div>
-                                    ) : (
-                                        <div className="relative">
-                                            <p className="text-sm text-white/80 leading-relaxed font-medium">
-                                                {petbotTip || '🐾 Mantener al día la desparasitación previene enfermedades graves en el corazón y pulmones. ¡Un pequeño gesto hoy es mucha salud mañana!'}
-                                            </p>
-                                            <div className="mt-4 pt-4 border-t border-white/5 flex justify-end">
-                                                <div className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">Powered by PetNova AI</div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </GlassCard>
-                            </motion.div>
+                            {firstPet && (
+                                <ProactiveTip pet={firstPet as any} />
+                            )}
                         </div>
                     </div>
                 )}
             </main>
 
-            {/* ── Modal (Glassmorphism) ────────────────────────────────────────────────── */}
-            <AnimatePresence>
-                {showModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-                            onClick={() => setShowModal(false)}
-                        />
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="w-full max-w-xl z-5 relative"
-                        >
-                            <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-primary-light/50 rounded-[2.5rem] blur-2xl opacity-20" />
-                            <GlassCard className="p-8 border-primary/30 shadow-2xl overflow-visible relative">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -z-10" />
-                                <div className="flex justify-between items-center mb-8">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary-light">
-                                            <Syringe size={24} />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-2xl font-bold font-outfit">Nuevo Registro</h2>
-                                            <p className="text-white/40 text-sm">Añade información médica importante</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowModal(false)}
-                                        className="p-2 rounded-full hover:bg-white/10 transition-colors text-white/30 hover:text-white"
-                                    >
-                                        <X size={24} />
-                                    </button>
-                                </div>
-
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2 px-1">Mascota *</label>
-                                            <div className="relative">
-                                                <select
-                                                    value={fPetId}
-                                                    onChange={e => setFPetId(e.target.value)}
-                                                    required
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all appearance-none"
-                                                >
-                                                    <option value="">Selecciona...</option>
-                                                    {pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                                </select>
-                                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 rotate-90" size={16} />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2 px-1">Tipo *</label>
-                                            <div className="relative">
-                                                <select
-                                                    value={fType}
-                                                    onChange={e => setFType(e.target.value)}
-                                                    required
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all appearance-none"
-                                                >
-                                                    {RECORD_TYPES.map(rt => (
-                                                        <option key={rt.value} value={rt.value}>{rt.label}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 rotate-90" size={16} />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2 px-1">Título del Registro *</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Ej: Vacuna Rabia 2025"
-                                            value={fTitle}
-                                            onChange={e => setFTitle(e.target.value)}
-                                            required
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/10"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2 px-1">Fecha Realizado *</label>
-                                            <input
-                                                type="date"
-                                                value={fDate}
-                                                onChange={e => setFDate(e.target.value)}
-                                                required
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all [color-scheme:dark]"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2 px-1">Próxima Cita (Opcional)</label>
-                                            <input
-                                                type="date"
-                                                value={fNextDate}
-                                                onChange={e => setFNextDate(e.target.value)}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all [color-scheme:dark]"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2 px-1">Notas u Observaciones</label>
-                                        <textarea
-                                            placeholder="Añade detalles sobre la dosis, centro veterinario o recomendaciones..."
-                                            value={fNotes}
-                                            onChange={e => setFNotes(e.target.value)}
-                                            rows={3}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all resize-none placeholder:text-white/10"
-                                        />
-                                    </div>
-
-                                    {fError && (
-                                        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                                            <AlertCircle size={16} /> {fError}
-                                        </div>
-                                    )}
-
-                                    <div className="flex gap-4 pt-4 border-t border-white/5">
-                                        <PremiumButton
-                                            className="flex-1 py-4 text-base font-bold shadow-[0_10px_20px_-5px_rgba(108,63,245,0.3)] group"
-                                            disabled={fSaving || !fTitle || !fPetId}
-                                            icon={<CheckCircle2 size={20} className={fSaving ? 'animate-spin' : 'group-hover:scale-110 transition-transform'} />}
-                                            type="submit"
-                                        >
-                                            {fSaving ? 'Guardando...' : 'Guardar en la Cartilla'}
-                                        </PremiumButton>
-                                    </div>
-                                </form>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+            <HealthRecordModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                pets={pets}
+                onSave={handleSave}
+            />
         </div>
     )
 }

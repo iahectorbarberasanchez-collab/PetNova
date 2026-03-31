@@ -4,46 +4,61 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { 
+  Home, 
+  PawPrint, 
+  MessageSquare, 
+  BookOpen, 
+  Map as MapIcon, 
+  Camera, 
+  Users, 
+  Bell, 
+  Heart, 
+  Gift, 
+  ShoppingBag, 
+  Briefcase, 
+  Settings,
+  LogOut,
+  ChevronRight
+} from 'lucide-react'
 
 const menuCategories = [
     {
         title: 'Principal',
         items: [
-            { icon: '🏠', label: 'Inicio', href: '/dashboard' },
-            { icon: '🐾', label: 'Mis Mascotas', href: '/dashboard/pets' },
-            { icon: '🤖', label: 'PetBot', href: '/dashboard/petbot' },
+            { icon: <Home size={18} />, label: 'Inicio', href: '/dashboard' },
+            { icon: <PawPrint size={18} />, label: 'Mis Mascotas', href: '/dashboard/pets' },
+            { icon: <MessageSquare size={18} />, label: 'PetBot', href: '/dashboard/petbot' },
         ]
     },
     {
         title: 'Gestión',
         items: [
-            { icon: '💉', label: 'Cartilla', href: '/dashboard/health' },
-            { icon: '🦮', label: 'Paseos', href: '/dashboard/walks' },
-            { icon: '🗺️', label: 'Mapa', href: '/dashboard/map' },
+            { icon: <BookOpen size={18} />, label: 'Cartilla', href: '/dashboard/health' },
+            { icon: <MapIcon size={18} />, label: 'Mapa', href: '/dashboard/map' },
         ]
     },
     {
         title: 'Comunidad',
         items: [
-            { icon: '📸', label: 'Social', href: '/dashboard/social' },
-            { icon: '👥', label: 'Amigos', href: '/dashboard/friends' },
-            { icon: '🚨', label: 'Alertas', href: '/dashboard/alerts' },
-            { icon: '💞', label: 'Peludos', href: '/dashboard/match' },
-            { icon: '🎁', label: 'Invitar Amigos', href: '/dashboard/referral' },
+            { icon: <Camera size={18} />, label: 'Social', href: '/dashboard/social' },
+            { icon: <Users size={18} />, label: 'Amigos', href: '/dashboard/friends' },
+            { icon: <Bell size={18} />, label: 'Alertas SOS', href: '/dashboard/alerts' },
+            { icon: <Heart size={18} />, label: 'Machos/Hembras', href: '/dashboard/match' },
+            { icon: <Gift size={18} />, label: 'Invitar', href: '/dashboard/referral' },
         ]
     },
     {
         title: 'Servicios',
         items: [
-            { icon: '🛍️', label: 'Tienda', href: '/dashboard/shop' },
-            { icon: '🤝', label: 'Servicios', href: '/dashboard/services' },
-            { icon: '📝', label: 'Blog', href: '/blog' },
+            { icon: <ShoppingBag size={18} />, label: 'Tienda', href: '/dashboard/shop' },
+            { icon: <Briefcase size={18} />, label: 'Servicios', href: '/dashboard/services' },
         ]
     },
     {
         title: 'Otros',
         items: [
-            { icon: '⚙️', label: 'Ajustes', href: '/dashboard/settings' },
+            { icon: <Settings size={18} />, label: 'Ajustes', href: '/dashboard/settings' },
         ]
     }
 ]
@@ -59,9 +74,7 @@ export default function Sidebar() {
         supabase.auth.getUser().then(async ({ data: { user } }) => {
             if (user) {
                 const { data } = await supabase.from('profiles').select('pet_coins').eq('id', user.id).single()
-                if (data && data.pet_coins !== undefined) {
-                    setPetCoins(data.pet_coins)
-                }
+                if (data) setPetCoins(data.pet_coins)
             }
         })
     }, [])
@@ -72,102 +85,63 @@ export default function Sidebar() {
     }
 
     return (
-        <aside className="sidebar-desktop" style={{
-            width: 260, flexShrink: 0,
-            background: 'rgba(8, 8, 18, 0.98)',
-            borderRight: '1px solid rgba(108, 63, 245, 0.15)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            display: 'flex', flexDirection: 'column',
-            position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 10,
-        }}>
-            {/* Logo */}
-            <div style={{ padding: '26px 22px', borderBottom: '1px solid rgba(108,63,245,0.12)' }}>
-                <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-                    <img src="/logo.png" alt="PetNova Logo" style={{
-                        width: 42, height: 42, borderRadius: 13,
-                        boxShadow: '0 4px 20px rgba(108,63,245,0.4)',
-                        objectFit: 'cover'
-                    }} />
+        <aside className="fixed top-0 left-0 bottom-0 w-[260px] hidden lg:flex flex-col bg-[#080812]/98 border-r border-[#6C3FF5]/15 backdrop-blur-3xl z-50">
+            {/* Logo Section */}
+            <div className="p-6 border-b border-[#6C3FF5]/10">
+                <Link href="/dashboard" className="flex items-center gap-3 no-underline group">
+                    <div className="relative">
+                        <img src="/logo.png" alt="PetNova" className="w-10 h-10 rounded-xl shadow-[0_0_20px_rgba(108,63,245,0.4)] object-cover group-hover:scale-105 transition-transform" />
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-[#8B5CF6]/20 to-transparent pointer-events-none" />
+                    </div>
                     <div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.15rem', lineHeight: 1 }}>
-                            <span style={{ background: 'linear-gradient(135deg, #8B5CF6, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                                PetNova
-                            </span>
-                        </div>
-                        <div style={{ fontSize: '0.68rem', color: 'rgba(248,248,255,0.35)', marginTop: 2 }}>v1.0 Beta</div>
+                        <h1 className="font-outfit font-extrabold text-lg leading-tight bg-gradient-to-r from-[#8B5CF6] to-[#00D4FF] bg-clip-text text-transparent">
+                            PetNova
+                        </h1>
+                        <p className="text-[10px] text-white/30 font-medium tracking-wider uppercase mt-0.5">v1.0 Premium</p>
                     </div>
                 </Link>
 
+                {/* PetCoins Badge */}
                 {petCoins !== null && (
-                    <Link href="/dashboard/petcoins" style={{ textDecoration: 'none' }}>
-                        <div className="hover:-translate-y-[2px] hover:shadow-[0_4px_15px_rgba(255,215,0,0.2)] transition-all duration-200" style={{
-                            marginTop: 16,
-                            padding: '8px 12px',
-                            background: 'rgba(255, 215, 0, 0.1)',
-                            border: '1px solid rgba(255, 215, 0, 0.3)',
-                            borderRadius: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            color: '#FFD700',
-                            fontFamily: 'Outfit, sans-serif',
-                            fontWeight: 700,
-                            fontSize: '0.85rem',
-                            boxShadow: '0 2px 10px rgba(255, 215, 0, 0.1)',
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span className="text-[1.1rem] hover:scale-110 transition-transform duration-200">🪙</span>
-                                <span>{petCoins.toLocaleString()}</span>
-                            </div>
-                            <span style={{ fontSize: '0.7rem', opacity: 0.8, background: 'rgba(255,215,0,0.2)', padding: '2px 6px', borderRadius: '6px' }}>
-                                PetCoins
-                            </span>
+                    <Link href="/dashboard/petcoins" className="mt-5 flex items-center justify-between p-2.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl group hover:bg-yellow-500/15 transition-all">
+                        <div className="flex items-center gap-2 text-yellow-500 font-outfit font-bold text-sm">
+                            <span className="text-base group-hover:scale-125 transition-transform duration-300">🪙</span>
+                            <span>{petCoins.toLocaleString()}</span>
                         </div>
+                        <span className="text-[9px] font-bold uppercase tracking-tighter bg-yellow-500/20 px-1.5 py-0.5 rounded-md text-yellow-500">
+                            PetCoins
+                        </span>
                     </Link>
                 )}
             </div>
 
-            {/* Nav */}
-            <nav style={{ flex: 1, padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: 20, overflowY: 'auto' }}>
+            {/* Navigation */}
+            <nav className="flex-1 px-3 py-6 space-y-6 overflow-y-auto scrollbar-hide">
                 {menuCategories.map((category) => (
-                    <div key={category.title} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <h3 style={{
-                            paddingLeft: 14,
-                            marginBottom: 4,
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                            color: 'rgba(248,248,255,0.25)',
-                            fontFamily: 'Outfit, sans-serif'
-                        }}>
+                    <div key={category.title} className="space-y-1">
+                        <h3 className="px-3 text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] mb-2 font-outfit">
                             {category.title}
                         </h3>
                         {category.items.map((item) => {
                             const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
                             return (
-                                <Link key={item.label} href={item.href}
-                                    className={`group ${!isActive ? 'hover:bg-white/5 hover:text-white' : ''}`}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: 11, padding: '10px 14px',
-                                        borderRadius: 11, textDecoration: 'none',
-                                        fontSize: '0.88rem', fontWeight: isActive ? 600 : 500,
-                                        fontFamily: 'Inter, sans-serif',
-                                        transition: 'all 0.2s ease',
-                                        background: isActive ? 'rgba(108,63,245,0.18)' : 'transparent',
-                                        color: isActive ? '#A78BFA' : 'rgba(248,248,255,0.55)',
-                                        border: isActive ? '1px solid rgba(108,63,245,0.3)' : '1px solid transparent',
-                                        boxShadow: isActive ? '0 0 16px rgba(108,63,245,0.12)' : 'none',
-                                    }}>
-                                    <span
-                                        className="text-[17px] shrink-0 transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-6"
-                                    >
+                                <Link 
+                                    key={item.label} 
+                                    href={item.href}
+                                    className={`
+                                        flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group
+                                        ${isActive 
+                                            ? 'bg-[#6C3FF5]/15 text-[#A78BFA] border border-[#6C3FF5]/30 shadow-[0_0_20px_rgba(108,63,245,0.1)]' 
+                                            : 'text-white/50 hover:bg-white/5 hover:text-white border border-transparent'
+                                        }
+                                    `}
+                                >
+                                    <span className={`transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${isActive ? 'text-[#8B5CF6]' : 'text-white/30 group-hover:text-white/60'}`}>
                                         {item.icon}
                                     </span>
                                     {item.label}
                                     {isActive && (
-                                        <div style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)', boxShadow: '0 0 6px #6C3FF5' }} />
+                                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-gradient-to-tr from-[#6C3FF5] to-[#00D4FF] shadow-[0_0_8px_#6C3FF5]" />
                                     )}
                                 </Link>
                             )
@@ -176,13 +150,14 @@ export default function Sidebar() {
                 ))}
             </nav>
 
-            {/* Logout */}
-            <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(108,63,245,0.12)' }}>
+            {/* Footer / Logout */}
+            <div className="p-4 border-t border-[#6C3FF5]/10">
                 <button
                     onClick={handleLogout}
-                    className="w-full p-[10px] rounded-[11px] bg-transparent border border-[rgba(108,63,245,0.2)] text-[rgba(248,248,255,0.45)] font-outfit font-semibold text-[0.84rem] cursor-pointer transition-all duration-200 flex items-center justify-center gap-[7px] hover:bg-[rgba(255,80,80,0.08)] hover:border-[rgba(255,80,80,0.25)] hover:text-[#FF6B6B] hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 font-outfit font-semibold text-xs hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400 group transition-all duration-300"
                 >
-                    <span>🚪</span> Cerrar sesión
+                    <LogOut size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                    Cerrar Sesión
                 </button>
             </div>
         </aside>

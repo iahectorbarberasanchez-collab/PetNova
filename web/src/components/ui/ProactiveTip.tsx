@@ -8,9 +8,9 @@ interface PetContext {
     id: string;
     name: string;
     species: string;
-    breed?: string;
-    birth_date?: string;
-    weight?: number;
+    breed?: string | null;
+    birth_date?: string | null;
+    weight_kg?: number | null;
     conditions?: string[];
 }
 

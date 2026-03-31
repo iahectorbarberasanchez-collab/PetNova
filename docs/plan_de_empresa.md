@@ -1,4 +1,4 @@
-# 📋 PLAN DE EMPRESA — PETNEXA
+# 📋 PLAN DE EMPRESA — PetNova
 
 ### La SuperApp Definitiva para Mascotas
 
@@ -8,7 +8,7 @@
 
 ## 1. RESUMEN EJECUTIVO
 
-**PetNexa** es una plataforma digital integral (web + app móvil) diseñada para ser el ecosistema de referencia para dueños de mascotas en España y Latinoamérica. Centraliza en un único lugar la salud veterinaria, la vida social de las mascotas, los servicios del sector y el comercio electrónico pet-friendly.
+**PetNova** es una plataforma digital integral (web + app móvil) diseñada para ser el ecosistema de referencia para dueños de mascotas en España y Latinoamérica. Centraliza en un único lugar la salud veterinaria, la vida social de las mascotas, los servicios del sector y el comercio electrónico pet-friendly.
 
 | Dato clave | Detalle |
 |---|---|
@@ -36,13 +36,13 @@ Los dueños de mascotas en España —más de **9,3 millones de hogares** con ma
 
 ### 2.2 La Oportunidad
 
-El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un ritmo del **8% anual**. El segmento digital está en plena ebullición, pero sin un líder claro local que integre todas las necesidades en una sola app. **PetNexa** es esa solución.
+El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un ritmo del **8% anual**. El segmento digital está en plena ebullición, pero sin un líder claro local que integre todas las necesidades en una sola app. **PetNova** es esa solución.
 
 ---
 
 ## 3. PROPUESTA DE VALOR
 
-> *"PetNexa es la única app que une la salud, la vida social, y todos los servicios de tu mascota en un solo lugar — gratis para empezar, imprescindible para quedarse."*
+> *"PetNova es la única app que une la salud, la vida social, y todos los servicios de tu mascota en un solo lugar — gratis para empezar, imprescindible para quedarse."*
 
 | Para quién | Propuesta |
 |---|---|
@@ -84,9 +84,9 @@ El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un r
 
 ### 4.3 Fase 3 (mes 18+)
 
-- 📦 **PetNexa Boxes**: Cajas de suscripción mensual personalizadas.
+- 📦 **PetNova Boxes**: Cajas de suscripción mensual personalizadas.
 - 🌐 **IoT / GPS**: Integración con collares inteligentes.
-- 🏅 **Sello PetNexa Friendly**: Certificación para locales pet-friendly.
+- 🏅 **Sello PetNova Friendly**: Certificación para locales pet-friendly.
 - 📊 **Big Data para Marcas**: Informes anonimizados del mercado.
 
 ---
@@ -95,7 +95,7 @@ El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un r
 
 ### Fuente 1: Freemium (B2C)
 
-**Plan gratuito** para todos los usuarios + **PetNexa Premium** (~9,99 €/mes):
+**Plan gratuito** para todos los usuarios + **PetNova Premium** (~9,99 €/mes):
 
 - Telemedicina veterinaria con descuento/ilimitada
 - PetBot sin límite de consultas
@@ -105,7 +105,7 @@ El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un r
 ### Fuente 2: B2B — Profesionales y Negocios
 
 - **Suscripción profesional** (49–99 €/mes): peluquerías, paseadores, veterinarios.
-- **Sello PetNexa Friendly** (199–499 €/año): para locales y alojamientos.
+- **Sello PetNova Friendly** (199–499 €/año): para locales y alojamientos.
 
 ### Fuente 3: Comisiones de Marketplace
 
@@ -155,9 +155,9 @@ El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un r
 | **Gudog** | España | Interfaz sencilla | Muy nicho, sin escalar |
 | **Snau** | España | Comunidad social | Sin salud ni servicios |
 | **TailsLife** | UK | Red social bien hecha | Sin servicios ni marketplace |
-| **PetNexa** | España+LATAM | **TODO EN UNO** | Nuevo en el mercado |
+| **PetNova** | España+LATAM | **TODO EN UNO** | Nuevo en el mercado |
 
-**Ventaja competitiva clave:** Ningún competidor integra salud, comunidad, servicios y comercio. PetNexa es el primero.
+**Ventaja competitiva clave:** Ningún competidor integra salud, comunidad, servicios y comercio. PetNova es el primero.
 
 ---
 
@@ -279,9 +279,9 @@ El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un r
 2026 Q2  ──── Lanzamiento Beta Privada (500 usuarios)
 2026 Q3  ──── Lanzamiento Público + Directorio de Servicios
 2026 Q4  ──── PetBot IA + Telemedicina + Tinder de Mascotas
-2027 Q1  ──── Marketplace + PetNexa Premium
+2027 Q1  ──── Marketplace + PetNova Premium
 2027 Q2  ──── Expansión a Portugal y México
-2027 Q3  ──── PetNexa Boxes + Certificación Pet-Friendly
+2027 Q3  ──── PetNova Boxes + Certificación Pet-Friendly
 2027 Q4  ──── Serie A (objetivo: 1M€+)
 ```
 
@@ -317,11 +317,11 @@ El mercado de mascotas en España facturó **1.500 M€ en 2024** y crece a un r
 
 ## 14. CONCLUSIÓN
 
-PetNexa tiene el potencial de convertirse en el **Glovo de las mascotas en España**: una plataforma indispensable que conecta dueños, profesionales y marcas del sector. Cuenta con un equipo técnico capaz, un stack moderno y probado, y un mercado en crecimiento sin un líder claro.
+PetNova tiene el potencial de convertirse en el **Glovo de las mascotas en España**: una plataforma indispensable que conecta dueños, profesionales y marcas del sector. Cuenta con un equipo técnico capaz, un stack moderno y probado, y un mercado en crecimiento sin un líder claro.
 
-La estrategia freemium garantiza una adquisición masiva y gratuita de usuarios, mientras que los modelos B2B y de comisiones aseguran ingresos recurrentes desde el primer año. Con una inversión seed de **120.000 €**, PetNexa estará en posición de lograr el punto de equilibrio en el mes 18 y preparar una **Serie A** en 2027.
+La estrategia freemium garantiza una adquisición masiva y gratuita de usuarios, mientras que los modelos B2B y de comisiones aseguran ingresos recurrentes desde el primer año. Con una inversión seed de **120.000 €**, PetNova estará en posición de lograr el punto de equilibrio en el mes 18 y preparar una **Serie A** en 2027.
 
 ---
 
-*Documento elaborado por el equipo fundador de PetNexa · Febrero 2026*
-*Para más información: <contacto@petnexa.app>*
+*Documento elaborado por el equipo fundador de PetNova · Febrero 2026*
+*Para más información: <contacto@PetNova.app>*

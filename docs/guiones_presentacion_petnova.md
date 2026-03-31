@@ -1,6 +1,6 @@
-# Guiones de Presentación — PetNexa
+# Guiones de Presentación — PetNova
 
-Este documento contiene dos guiones diseñados para presentar PetNexa a diferentes audiencias clave.
+Este documento contiene dos guiones diseñados para presentar PetNova a diferentes audiencias clave.
 
 ---
 
@@ -11,11 +11,11 @@ Este documento contiene dos guiones diseñados para presentar PetNexa a diferent
 
 ### Introducción (El Hook)
 
-"¿Sabían que en España hay más hogares con perros que con niños? Tenemos 9,3 millones de familias conviviendo con mascotas, pero su cuidado sigue siendo un caos analógico: cartillas de papel que se pierden, búsquedas infinitas en Google para encontrar un buen veterinario y ninguna comunidad real. El soporte digital para este mercado de 1.500 millones de euros está roto. Por eso hemos creado PetNexa."
+"¿Sabían que en España hay más hogares con perros que con niños? Tenemos 9,3 millones de familias conviviendo con mascotas, pero su cuidado sigue siendo un caos analógico: cartillas de papel que se pierden, búsquedas infinitas en Google para encontrar un buen veterinario y ninguna comunidad real. El soporte digital para este mercado de 1.500 millones de euros está roto. Por eso hemos creado PetNova."
 
 ### La Solución
 
-"PetNexa es la SuperApp definitiva que centraliza todo el ciclo de vida de la mascota. Desde una cartilla de salud digital inteligente con recordatorios automáticos, hasta una red social vertical y un marketplace integrado. No somos solo una app de salud o una de servicios; somos el ecosistema donde ocurre todo lo relacionado con tu mascota."
+"PetNova es la SuperApp definitiva que centraliza todo el ciclo de vida de la mascota. Desde una cartilla de salud digital inteligente con recordatorios automáticos, hasta una red social vertical y un marketplace integrado. No somos solo una app de salud o una de servicios; somos el ecosistema donde ocurre todo lo relacionado con tu mascota."
 
 ### Modelo de Negocio e IA
 
@@ -30,7 +30,7 @@ Este documento contiene dos guiones diseñados para presentar PetNexa a diferent
 
 ### Cierre
 
-"En PetNexa no solo mejoramos la vida de las mascotas, estamos construyendo el estándar digital para el miembro más querido de la familia. ¿Nos acompañan?"
+"En PetNova no solo mejoramos la vida de las mascotas, estamos construyendo el estándar digital para el miembro más querido de la familia. ¿Nos acompañan?"
 
 ---
 
@@ -43,11 +43,11 @@ Este documento contiene dos guiones diseñados para presentar PetNexa a diferent
 
 "Hola [Nombre del Partner/Marca], sabemos que el mayor resto hoy no es vender pienso, sino venderlo a la mascota *correcta* en el momento *adecuado*. El marketing genérico cada vez es más caro y menos efectivo."
 
-### La Propuesta de PetNexa
+### La Propuesta de PetNova
 
-"En PetNexa, no os ofrecemos solo un espacio en una tienda. Os ofrecemos acceso a **perfiles de mascotas verificados**. Sabemos exactamente qué raza es, cuánto pesa, qué edad tiene y si tiene alergias.
+"En PetNova, no os ofrecemos solo un espacio en una tienda. Os ofrecemos acceso a **perfiles de mascotas verificados**. Sabemos exactamente qué raza es, cuánto pesa, qué edad tiene y si tiene alergias.
 
-Imaginaos poder lanzar una campaña de vuestro pienso 'Puppy Sensitive' directamente a dueños de cachorros de razas medianas con problemas digestivos en una zona geográfica concreta. Esa es la segmentación quirúrgica que PetNexa pone en vuestras manos."
+Imaginaos poder lanzar una campaña de vuestro pienso 'Puppy Sensitive' directamente a dueños de cachorros de razas medianas con problemas digestivos en una zona geográfica concreta. Esa es la segmentación quirúrgica que PetNova pone en vuestras manos."
 
 ### El Motor de Venta: PetCoins
 
