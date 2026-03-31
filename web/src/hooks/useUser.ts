@@ -33,5 +33,5 @@ export function useUser() {
     getUser()
   }, [supabase])
 
-  return { user, profile, loading, userId: user?.id }
+  return { user, profile, loading, userId: user?.id ?? null }
 }

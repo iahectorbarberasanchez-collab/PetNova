@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { HealthRecord } from '@/lib/types'
 
@@ -6,7 +6,7 @@ export function useHealthRecords(petId?: string | null) {
   const [records, setRecords] = useState<HealthRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const fetchHealthRecords = useCallback(async () => {
     try {
@@ -26,9 +26,10 @@ export function useHealthRecords(petId?: string | null) {
       if (fetchError) throw fetchError
       
       setRecords(data as HealthRecord[] || [])
-    } catch (err: any) {
-      console.error('Error fetching health records:', err)
-      setError(err.message)
+    } catch (err) {
+      const e = err as Error
+      console.error('Error fetching health records:', e)
+      setError(e.message)
     } finally {
       setLoading(false)
     }
