@@ -8,7 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Copy, Check, Users, Gift, TrendingUp } from 'lucide-react'
+import { Copy, Check, Users, Gift, TrendingUp, Mail, Facebook, Twitter, ShieldCheck } from 'lucide-react'
 
 interface Referral {
     id: string
@@ -217,18 +217,36 @@ export default function ReferralPage() {
                                     href={`https://wa.me/?text=${encodeURIComponent(`🐾 ¡Únete a PetNova, la app para dueños de mascotas! Regístrate con mi enlace y recibirás 100 PetCoins de regalo: ${referralLink}`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
                                     style={{ background: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.25)', color: '#25D366' }}
                                 >
                                     <span className="text-base">📱</span> WhatsApp
                                 </a>
-                                <button
-                                    onClick={handleCopy}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all border-none cursor-pointer"
-                                    style={{ background: 'rgba(108,63,245,0.12)', border: '1px solid rgba(108,63,245,0.25)', color: '#A78BFA' }}
+                                <a
+                                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🐾 ¡Únete a PetNova y gana 100 PetCoins de regalo! ${referralLink}`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
+                                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
                                 >
-                                    <span className="text-base">🔗</span> Copiar enlace
-                                </button>
+                                    <Twitter size={14} /> X (Twitter)
+                                </a>
+                                <a
+                                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
+                                    style={{ background: 'rgba(24,119,242,0.12)', border: '1px solid rgba(24,119,242,0.25)', color: '#1877F2' }}
+                                >
+                                    <Facebook size={14} /> Facebook
+                                </a>
+                                <a
+                                    href={`mailto:?subject=${encodeURIComponent('🐾 ¡Únete a PetNova!')}&body=${encodeURIComponent(`¡Hola! Te invito a unirte a PetNova, la app para dueños de mascotas. Regístrate con mi enlace y recibirás 100 PetCoins de regalo: ${referralLink}`)}`}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
+                                    style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.2)', color: '#FFD700' }}
+                                >
+                                    <Mail size={14} /> Email
+                                </a>
                             </div>
                         </GlassCard>
                     </motion.div>

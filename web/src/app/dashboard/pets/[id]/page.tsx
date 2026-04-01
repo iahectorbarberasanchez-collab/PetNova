@@ -5,27 +5,28 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import { Info, Leaf, Droplets, Thermometer, Box, Activity, Users, Settings, Heart, Shield } from 'lucide-react'
 
-// ── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ---
 const SPECIES_EMOJI: Record<string, string> = {
     Dog: '🐶', Cat: '🐱', Bird: '🐦', Fish: '🐠',
-    Rabbit: '🐇', Hamster: '🐹', Reptile: '🦎', Other: '🐾',
+    Rabbit: '🐇', Hamster: '🐹', Reptile: '🦎', Exotic: '🦄', Other: '🐾',
 }
 const SPECIES_COLOR: Record<string, string> = {
     Dog: '#F59E0B', Cat: '#8B5CF6', Bird: '#00D4FF', Fish: '#06B6D4',
-    Rabbit: '#EC4899', Hamster: '#F97316', Reptile: '#10B981', Other: '#6C3FF5',
+    Rabbit: '#EC4899', Hamster: '#F97316', Reptile: '#10B981', Exotic: '#A78BFA', Other: '#6C3FF5',
 }
-const SPECIES_OPTIONS = [
-    { value: 'Dog', label: '🐶 Perro' }, { value: 'Cat', label: '🐱 Gato' },
-    { value: 'Bird', label: '🐦 Ave' }, { value: 'Fish', label: '🐠 Pez' },
-    { value: 'Rabbit', label: '🐇 Conejo' }, { value: 'Hamster', label: '🐹 Hámster' },
-    { value: 'Reptile', label: '🦎 Reptil' }, { value: 'Other', label: '🐾 Otro' },
-]
 
 interface Pet {
     id: string; name: string; species: string; breed: string | null
     birth_date: string | null; weight_kg: number | null
     avatar_url: string | null; created_at: string; wants_to_breed: boolean
+}
+
+interface PetSpeciesProfile {
+    id: string; pet_id: string; species_category: string
+    specific_data: Record<string, any>; habitat_notes: string | null
+    dietary_requirements: string | null
 }
 
 interface PetPhoto {
@@ -43,16 +44,15 @@ function calcAge(birthDate: string | null): string {
     return m > 0 ? `${y}a ${m}m` : `${y} ${y === 1 ? 'año' : 'años'}`
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export default function PetDetailPage() {
     const supabase = createClient()
     const router = useRouter()
     const params = useParams()
     const petId = params.id as string
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const galleryInputRef = useRef<HTMLInputElement>(null)
 
     const [pet, setPet] = useState<Pet | null>(null)
+    const [profile, setProfile] = useState<PetSpeciesProfile | null>(null)
     const [petPhotos, setPetPhotos] = useState<PetPhoto[]>([])
     const [loading, setLoading] = useState(true)
     const [editing, setEditing] = useState(false)
@@ -62,11 +62,9 @@ export default function PetDetailPage() {
 
     // Photo upload state
     const [uploadingPhoto, setUploadingPhoto] = useState(false)
-    const [uploadingGallery, setUploadingGallery] = useState(false)
-    const [photoHover, setPhotoHover] = useState(false)
-    const [avatarKey, setAvatarKey] = useState(Date.now()) // force img re-render
+    const [avatarKey, setAvatarKey] = useState(Date.now())
 
-    // Edit state
+    // Edit state (Basic)
     const [editName, setEditName] = useState('')
     const [editSpecies, setEditSpecies] = useState('')
     const [editBreed, setEditBreed] = useState('')
@@ -74,108 +72,78 @@ export default function PetDetailPage() {
     const [editWeight, setEditWeight] = useState('')
     const [editWantsToBreed, setEditWantsToBreed] = useState(false)
 
+    // Edit state (Species Profile)
+    const [editSpecificData, setEditSpecificData] = useState<Record<string, any>>({})
+    const [editHabitat, setEditHabitat] = useState('')
+    const [editDiet, setEditDiet] = useState('')
+
     const [userId, setUserId] = useState<string | null>(null)
 
-    // ── Load ─────────────────────────────────────────────────────────────────
     useEffect(() => {
         supabase.auth.getUser().then(({ data: { user } }) => {
             if (!user) { router.push('/auth'); return }
             setUserId(user.id)
-            loadPet()
+            loadPetAll()
         })
     }, [petId])
 
-    const loadPet = async () => {
+    const loadPetAll = async () => {
         setLoading(true)
-        const { data, error } = await supabase.from('pets').select('*').eq('id', petId).single()
-        if (error || !data) { router.push('/dashboard/pets'); return }
+        const { data: petData, error: petErr } = await supabase.from('pets').select('*').eq('id', petId).single()
+        if (petErr || !petData) { router.push('/dashboard/pets'); return }
+        
+        const { data: profileData } = await supabase.from('pet_species_profiles').select('*').eq('pet_id', petId).single()
         const { data: photos } = await supabase.from('pet_photos').select('*').eq('pet_id', petId).order('created_at', { ascending: true })
         
+        setPet(petData)
+        setProfile(profileData || null)
         setPetPhotos(photos || [])
-        setPet(data)
-        setEditName(data.name)
-        setEditSpecies(data.species)
-        setEditBreed(data.breed || '')
-        setEditBirth(data.birth_date || '')
-        setEditWeight(data.weight_kg?.toString() || '')
-        setEditWantsToBreed(data.wants_to_breed || false)
+
+        // Sync edit state
+        setEditName(petData.name)
+        setEditSpecies(petData.species)
+        setEditBreed(petData.breed || '')
+        setEditBirth(petData.birth_date || '')
+        setEditWeight(petData.weight_kg?.toString() || '')
+        setEditWantsToBreed(petData.wants_to_breed || false)
+
+        if (profileData) {
+            setEditSpecificData(profileData.specific_data || {})
+            setEditHabitat(profileData.habitat_notes || '')
+            setEditDiet(profileData.dietary_requirements || '')
+        }
+
         setLoading(false)
     }
 
-    // ── Photo upload ──────────────────────────────────────────────────────────
     const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file || !userId) return
-        if (file.size > 5 * 1024 * 1024) { alert('La foto debe ser menor a 5 MB.'); return }
-
         setUploadingPhoto(true)
         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
         const path = `${userId}/${petId}/avatar.${ext}`
 
-        // Delete old avatar if exists
         if (pet?.avatar_url) {
-            // Extract old path from URL
             const oldPath = pet.avatar_url.split('/pet-photos/')[1]
             if (oldPath) await supabase.storage.from('pet-photos').remove([oldPath])
         }
 
-        const { error: upErr } = await supabase.storage
-            .from('pet-photos')
-            .upload(path, file, { upsert: true, contentType: file.type })
+        const { error: upErr } = await supabase.storage.from('pet-photos').upload(path, file, { upsert: true, contentType: file.type })
+        if (upErr) { alert(upErr.message); setUploadingPhoto(false); return }
 
-        if (upErr) { alert('Error subiendo la foto: ' + upErr.message); setUploadingPhoto(false); return }
-
-        // Get public URL
         const { data: { publicUrl } } = supabase.storage.from('pet-photos').getPublicUrl(path)
-
-        // Update pets table
-        const { error: dbErr } = await supabase.from('pets').update({ avatar_url: publicUrl }).eq('id', petId)
-        if (dbErr) { alert('Error guardando la URL: ' + dbErr.message); setUploadingPhoto(false); return }
+        await supabase.from('pets').update({ avatar_url: publicUrl }).eq('id', petId)
 
         setPet(prev => prev ? { ...prev, avatar_url: publicUrl } : prev)
         setAvatarKey(Date.now())
         setUploadingPhoto(false)
     }
 
-    const handleGalleryPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file || !userId) return
-        if (file.size > 5 * 1024 * 1024) { alert('La foto debe ser menor a 5 MB.'); return }
-        if (petPhotos.length >= 5) { alert('Máximo 5 fotos permitidas.'); return }
-        
-        setUploadingGallery(true)
-        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-        const fileName = `${Date.now()}.${ext}`
-        const path = `${userId}/${petId}/gallery/${fileName}`
-        
-        const { error: upErr } = await supabase.storage.from('pet-photos').upload(path, file, { contentType: file.type })
-        if (upErr) { alert('Error subiendo la foto: ' + upErr.message); setUploadingGallery(false); return }
-
-        const { data: { publicUrl } } = supabase.storage.from('pet-photos').getPublicUrl(path)
-
-        const { data: inserted, error: dbErr } = await supabase.from('pet_photos').insert({
-            pet_id: petId, photo_url: publicUrl
-        }).select().single()
-
-        if (dbErr) { alert('Error guardando la foto: ' + dbErr.message); setUploadingGallery(false); return }
-
-        setPetPhotos(prev => [...prev, inserted])
-        setUploadingGallery(false)
-    }
-
-    const handleDeleteGalleryPhoto = async (photoId: string, url: string) => {
-        if (!confirm('¿Eliminar esta foto?')) return
-        const pathMatch = url.split('/pet-photos/')[1]
-        if (pathMatch) await supabase.storage.from('pet-photos').remove([pathMatch])
-        await supabase.from('pet_photos').delete().eq('id', photoId)
-        setPetPhotos(prev => prev.filter(p => p.id !== photoId))
-    }
-
-    // ── Save edit ─────────────────────────────────────────────────────────────
-    const handleSave = async () => {
+    const handleSaveAll = async () => {
         if (!editName.trim()) return
         setSaving(true); setError(null)
-        const { data, error } = await supabase.from('pets').update({
+
+        const { data: upPet, error: errPet } = await supabase.from('pets').update({
             name: editName.trim(),
             species: editSpecies,
             breed: editBreed.trim() || null,
@@ -183,403 +151,164 @@ export default function PetDetailPage() {
             weight_kg: editWeight ? parseFloat(editWeight) : null,
             wants_to_breed: editWantsToBreed,
         }).eq('id', petId).select().single()
-        if (error) { setError(error.message); setSaving(false); return }
-        setPet(data)
+
+        if (errPet) { setError(errPet.message); setSaving(false); return }
+
+        const profileToSave = {
+            pet_id: petId,
+            species_category: editSpecies.toLowerCase(),
+            specific_data: editSpecificData,
+            habitat_notes: editHabitat.trim() || null,
+            dietary_requirements: editDiet.trim() || null
+        }
+
+        if (profile) {
+            await supabase.from('pet_species_profiles').update(profileToSave).eq('id', profile.id)
+        } else {
+            await supabase.from('pet_species_profiles').insert(profileToSave)
+        }
+
         setEditing(false)
         setSaving(false)
+        loadPetAll()
     }
 
-    // ── Delete pet ────────────────────────────────────────────────────────────
     const handleDelete = async () => {
-        if (!confirm(`¿Eliminar a ${pet?.name}? Esta acción es irreversible.`)) return
+        if (!confirm(`¿Eliminar a ${pet?.name}?`)) return
         setDeleting(true)
-        if (pet?.avatar_url && userId) {
-            const oldPath = pet.avatar_url.split('/pet-photos/')[1]
-            if (oldPath) await supabase.storage.from('pet-photos').remove([oldPath])
-        }
         await supabase.from('pets').delete().eq('id', petId)
         router.push('/dashboard/pets')
     }
 
-    // ── Styles ────────────────────────────────────────────────────────────────
+    const color = SPECIES_COLOR[pet?.species] || '#6C3FF5'
+    const emoji = SPECIES_EMOJI[pet?.species] || '🐾'
+
     const inputStyle: React.CSSProperties = {
         width: '100%', boxSizing: 'border-box',
         background: 'rgba(18,18,32,0.9)', border: '1px solid rgba(108,63,245,0.2)',
-        borderRadius: 11, padding: '11px 14px',
-        fontFamily: 'Inter, sans-serif', fontSize: '0.9rem', color: '#F8F8FF', outline: 'none',
-    }
-    const labelStyle: React.CSSProperties = {
-        display: 'block', fontSize: '0.73rem', fontWeight: 700,
-        color: 'rgba(248,248,255,0.35)', marginBottom: 6, letterSpacing: '0.05em',
+        borderRadius: 12, padding: '12px 16px', color: '#F8F8FF', outline: 'none',
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
     if (loading) return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#07070F' }}>
             <Sidebar />
             <main className="dashboard-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>🐾</div>
-                    <p style={{ color: 'rgba(248,248,255,0.4)', fontFamily: 'Outfit, sans-serif' }}>Cargando perfil...</p>
-                </div>
+                <span style={{ fontSize: 40, animation: 'pulse 1.5s infinite' }}>🐾</span>
             </main>
         </div>
     )
 
     if (!pet) return null
 
-    const color = SPECIES_COLOR[pet.species] || '#6C3FF5'
-    const emoji = SPECIES_EMOJI[pet.species] || '🐾'
-
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#07070F' }}>
             <Sidebar />
 
-            {/* Hidden file input */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                style={{ display: 'none' }}
-                onChange={handlePhotoChange}
-            />
-            <input
-                ref={galleryInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                style={{ display: 'none' }}
-                onChange={handleGalleryPhotoChange}
-            />
-
             <main className="dashboard-main" style={{ overflowY: 'auto' }}>
-                {/* Hero banner */}
-                <div style={{
-                    background: `linear-gradient(135deg, ${color}22 0%, rgba(0,0,0,0) 100%), #0D0D1A`,
-                    borderBottom: `1px solid ${color}18`,
-                    padding: '40px 48px 32px',
-                    position: 'relative',
-                }}>
-                    <Link href="/dashboard/pets" style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 28,
-                        color: 'rgba(248,248,255,0.4)', fontSize: '0.82rem', textDecoration: 'none',
-                        transition: 'color 0.2s',
-                    }}
-                        onMouseEnter={e => (e.currentTarget.style.color = '#F8F8FF')}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,248,255,0.4)')}>
-                        ← Mis Mascotas
-                    </Link>
-
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 28, flexWrap: 'wrap' }}>
-                        {/* Avatar con upload */}
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                            <div
-                                onClick={() => !uploadingPhoto && fileInputRef.current?.click()}
-                                onMouseEnter={() => setPhotoHover(true)}
-                                onMouseLeave={() => setPhotoHover(false)}
-                                style={{
-                                    width: 110, height: 110, borderRadius: '50%',
-                                    border: `3px solid ${color}`,
-                                    boxShadow: `0 0 30px ${color}35`,
-                                    cursor: uploadingPhoto ? 'wait' : 'pointer',
-                                    overflow: 'hidden', position: 'relative',
-                                    transition: 'transform 0.2s',
-                                    transform: photoHover ? 'scale(1.04)' : 'scale(1)',
-                                }}
-                            >
-                                {pet.avatar_url ? (
-                                    <img
-                                        key={avatarKey}
-                                        src={pet.avatar_url}
-                                        alt={pet.name}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                ) : (
-                                    <div style={{
-                                        width: '100%', height: '100%',
-                                        background: `linear-gradient(135deg, ${color}30, ${color}08)`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: 44,
-                                    }}>
-                                        {emoji}
-                                    </div>
-                                )}
-
-                                {/* Overlay on hover */}
-                                <div style={{
-                                    position: 'absolute', inset: 0,
-                                    background: 'rgba(0,0,0,0.55)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    flexDirection: 'column', gap: 4,
-                                    opacity: (photoHover || uploadingPhoto) ? 1 : 0,
-                                    transition: 'opacity 0.2s',
-                                }}>
-                                    {uploadingPhoto ? (
-                                        <span style={{ fontSize: 22 }}>⏳</span>
-                                    ) : (
-                                        <>
-                                            <span style={{ fontSize: 20 }}>📷</span>
-                                            <span style={{ fontSize: '0.62rem', color: 'white', fontWeight: 700 }}>
-                                                {pet.avatar_url ? 'Cambiar' : 'Añadir'}
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Upload hint */}
-                            <div style={{
-                                position: 'absolute', bottom: -6, right: -4,
-                                width: 28, height: 28, borderRadius: '50%',
-                                background: color, border: '3px solid #07070F',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 13, cursor: 'pointer',
-                                boxShadow: `0 2px 8px ${color}50`,
-                            }}
-                                onClick={() => fileInputRef.current?.click()}>
-                                {uploadingPhoto ? '⏳' : '✏️'}
-                            </div>
+                <div className="noise-overlay" />
+                
+                <div style={{ background: `linear-gradient(to bottom, ${color}15, transparent), #0D0D1A`, borderBottom: '1px solid rgba(255,255,255,0.03)', padding: '60px 48px 40px' }}>
+                    <div style={{ display: 'flex', gap: 32, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                        <div onClick={() => !uploadingPhoto && fileInputRef.current?.click()} style={{ width: 140, height: 140, borderRadius: 32, border: `3px solid ${color}`, boxShadow: `0 0 40px ${color}25`, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
+                            {pet.avatar_url ? <img src={pet.avatar_url} key={avatarKey} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, background: 'rgba(255,255,255,0.03)' }}>{emoji}</div>}
+                            {uploadingPhoto && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⏳</div>}
                         </div>
-
-                        {/* Name & info */}
                         <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
-                                <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2rem', fontWeight: 900, margin: 0 }}>
-                                    {pet.name}
-                                </h1>
-                                <span style={{
-                                    padding: '4px 14px', borderRadius: 100, fontSize: '0.78rem', fontWeight: 700,
-                                    background: `${color}18`, border: `1px solid ${color}30`, color,
-                                }}>
-                                    {emoji} {pet.species}
-                                </span>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 8 }}>
+                                <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2.8rem', fontWeight: 900, margin: 0 }}>{pet.name}</h1>
+                                <span style={{ padding: '6px 16px', borderRadius: 100, background: `${color}15`, border: `1px solid ${color}30`, color, fontSize: '0.85rem', fontWeight: 800 }}>{emoji} {pet.species.toUpperCase()}</span>
                             </div>
-                            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', color: 'rgba(248,248,255,0.5)', fontSize: '0.85rem' }}>
-                                {pet.breed && <span>🐾 {pet.breed}</span>}
+                            <div style={{ display: 'flex', gap: 24, color: 'rgba(248,248,255,0.4)', fontSize: '0.95rem', fontWeight: 600 }}>
+                                <span>🏷️ {pet.breed || 'Sin raza'}</span>
                                 <span>🎂 {calcAge(pet.birth_date)}</span>
                                 {pet.weight_kg && <span>⚖️ {pet.weight_kg} kg</span>}
                             </div>
-                            <p style={{ fontSize: '0.72rem', color: 'rgba(248,248,255,0.2)', marginTop: 10 }}>
-                                📷 Haz clic en la foto para cambiarla · Max 5 MB · JPG, PNG o WebP
-                            </p>
                         </div>
-
-                        {/* Actions */}
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            {!editing && (
-                                <button onClick={() => setEditing(true)} style={{
-                                    padding: '10px 22px', borderRadius: 12,
-                                    background: `${color}18`, border: `1px solid ${color}30`,
-                                    color, fontFamily: 'Outfit, sans-serif', fontWeight: 700,
-                                    fontSize: '0.85rem', cursor: 'pointer',
-                                }}>✏️ Editar</button>
-                            )}
-                            <button onClick={handleDelete} disabled={deleting} style={{
-                                padding: '10px 18px', borderRadius: 12,
-                                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-                                color: '#EF4444', fontFamily: 'Outfit, sans-serif', fontWeight: 700,
-                                fontSize: '0.85rem', cursor: deleting ? 'wait' : 'pointer',
-                            }}>
-                                {deleting ? '⏳' : '🗑️'}
-                            </button>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button onClick={() => setEditing(!editing)} style={{ padding: '12px 24px', borderRadius: 14, background: editing ? '#F8F8FF' : 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: editing ? '#000' : '#F8F8FF', fontWeight: 800, cursor: 'pointer' }}>{editing ? 'CANCELAR' : 'EDITAR PERFIL'}</button>
+                            <button onClick={handleDelete} style={{ padding: '12px', borderRadius: 14, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', cursor: 'pointer' }}><Shield size={20} /></button>
                         </div>
                     </div>
                 </div>
 
-                {/* Body */}
-                <div style={{ padding: '36px 48px', maxWidth: 860 }}>
-                    {/* Edit form */}
+                <div style={{ padding: '48px', maxWidth: 1100 }}>
                     {editing ? (
-                        <div style={{
-                            background: 'rgba(13,13,25,0.85)', backdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(108,63,245,0.18)', borderRadius: 20, padding: '28px',
-                            marginBottom: 28,
-                        }}>
-                            <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, marginBottom: 24, fontSize: '1rem' }}>
-                                ✏️ Editar información
-                            </h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 18 }}>
-                                <div>
-                                    <label style={labelStyle}>NOMBRE *</label>
-                                    <input style={inputStyle} value={editName} onChange={e => setEditName(e.target.value)}
-                                        onFocus={e => { e.currentTarget.style.borderColor = '#6C3FF5'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(108,63,245,0.1)' }}
-                                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(108,63,245,0.2)'; e.currentTarget.style.boxShadow = 'none' }} />
-                                </div>
-                                <div>
-                                    <label style={labelStyle}>RAZA / VARIEDAD</label>
-                                    <input style={inputStyle} value={editBreed} onChange={e => setEditBreed(e.target.value)} placeholder="Golden Retriever, Persa..."
-                                        onFocus={e => { e.currentTarget.style.borderColor = '#6C3FF5'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(108,63,245,0.1)' }}
-                                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(108,63,245,0.2)'; e.currentTarget.style.boxShadow = 'none' }} />
-                                </div>
-                                <div>
-                                    <label style={labelStyle}>FECHA DE NACIMIENTO</label>
-                                    <input style={{ ...inputStyle, colorScheme: 'dark' }} type="date" value={editBirth} onChange={e => setEditBirth(e.target.value)} max={new Date().toISOString().split('T')[0]} />
-                                </div>
-                                <div>
-                                    <label style={labelStyle}>PESO (kg)</label>
-                                    <input style={inputStyle} type="number" step="0.1" min="0" max="999" value={editWeight} onChange={e => setEditWeight(e.target.value)} placeholder="4.5"
-                                        onFocus={e => { e.currentTarget.style.borderColor = '#6C3FF5'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(108,63,245,0.1)' }}
-                                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(108,63,245,0.2)'; e.currentTarget.style.boxShadow = 'none' }} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 28, padding: '40px' }}>
+                                <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, marginBottom: 24 }}>General Info</h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+                                    <div><label style={{ fontSize: '0.7rem', opacity: 0.4 }}>NOMBRE</label><input style={inputStyle} value={editName} onChange={e => setEditName(e.target.value)} /></div>
+                                    <div><label style={{ fontSize: '0.7rem', opacity: 0.4 }}>NACIMIENTO</label><input style={{...inputStyle, colorScheme: 'dark'}} type="date" value={editBirth} onChange={e => setEditBirth(e.target.value)} /></div>
+                                    <div><label style={{ fontSize: '0.7rem', opacity: 0.4 }}>PESO (kg)</label><input style={inputStyle} type="number" step="0.1" value={editWeight} onChange={e => setEditWeight(e.target.value)} /></div>
                                 </div>
                             </div>
-
-                            <div style={{ marginBottom: 18 }}>
-                                <label style={labelStyle}>ESPECIE</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                                    {SPECIES_OPTIONS.map(opt => (
-                                        <button key={opt.value} type="button" onClick={() => setEditSpecies(opt.value)} style={{
-                                            padding: '10px 8px', borderRadius: 11, cursor: 'pointer',
-                                            border: `1.5px solid ${editSpecies === opt.value ? color : 'rgba(108,63,245,0.12)'}`,
-                                            background: editSpecies === opt.value ? `${color}18` : 'rgba(255,255,255,0.02)',
-                                            color: editSpecies === opt.value ? color : 'rgba(248,248,255,0.45)',
-                                            fontFamily: 'Inter, sans-serif', fontSize: '0.8rem', fontWeight: editSpecies === opt.value ? 700 : 400,
-                                            transition: 'all 0.15s',
-                                        }}>
-                                            {opt.label}
-                                        </button>
+                            <div style={{ background: 'rgba(108,63,245,0.05)', border: '1px solid rgba(108,63,245,0.15)', borderRadius: 28, padding: '40px' }}>
+                                <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, marginBottom: 24 }}>Cuidado Específico {emoji}</h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+                                    <div><label style={{ fontSize: '0.7rem', opacity: 0.4 }}>HÁBITAT Y NOTAS</label><textarea style={{ ...inputStyle, height: 120, resize: 'none', marginTop: 6 }} value={editHabitat} onChange={e => setEditHabitat(e.target.value)} /></div>
+                                    <div><label style={{ fontSize: '0.7rem', opacity: 0.4 }}>DIETA Y NUTRICIÓN</label><textarea style={{ ...inputStyle, height: 120, resize: 'none', marginTop: 6 }} value={editDiet} onChange={e => setEditDiet(e.target.value)} /></div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16 }}>
+                                    {Object.keys(editSpecificData).map(key => (
+                                        <div key={key}>
+                                            <label style={{ fontSize: '0.7rem', opacity: 0.4 }}>{key.replace('_',' ').toUpperCase()}</label>
+                                            <input style={inputStyle} value={editSpecificData[key]} onChange={e => setEditSpecificData({...editSpecificData, [key]: e.target.value})} />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Tinder / Montas Option */}
-                            <div style={{ marginBottom: 24, padding: '18px', background: 'rgba(255,107,107,0.05)', border: '1px solid rgba(255,107,107,0.2)', borderRadius: 12 }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-                                    <input 
-                                        type="checkbox" 
-                                        checked={editWantsToBreed} 
-                                        onChange={e => setEditWantsToBreed(e.target.checked)}
-                                        style={{ width: 18, height: 18, accentColor: '#FF6B6B' }}
-                                    />
-                                    <div>
-                                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#FF6B6B' }}>
-                                            🔥 Disponible para Match (Montas)
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: 'rgba(248,248,255,0.5)', marginTop: 4 }}>
-                                            Activa esta opción para que otras mascotas puedan hacer Match. Requisitos: Al menos 3 fotos en total de la mascota.
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-
-                            {error && <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '10px 14px', color: '#EF4444', fontSize: '0.84rem', marginBottom: 16 }}>⚠️ {error}</div>}
-
-                            <div style={{ display: 'flex', gap: 10 }}>
-                                <button onClick={handleSave} disabled={saving || !editName.trim()} style={{
-                                    flex: 1, padding: '12px', borderRadius: 12, border: 'none',
-                                    background: !editName.trim() ? 'rgba(108,63,245,0.3)' : 'linear-gradient(135deg, #6C3FF5, #00D4FF)',
-                                    color: 'white', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.9rem',
-                                    cursor: (!editName.trim() || saving) ? 'not-allowed' : 'pointer',
-                                    boxShadow: editName.trim() ? '0 4px 18px rgba(108,63,245,0.4)' : 'none',
-                                }}>
-                                    {saving ? '⏳ Guardando...' : '💾 Guardar cambios'}
-                                </button>
-                                <button onClick={() => { setEditing(false); setError(null) }} style={{
-                                    padding: '12px 22px', borderRadius: 12, background: 'transparent',
-                                    border: '1px solid rgba(108,63,245,0.18)', color: 'rgba(248,248,255,0.45)',
-                                    cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.88rem',
-                                }}>
-                                    Cancelar
-                                </button>
-                            </div>
+                            <button onClick={handleSaveAll} disabled={saving} style={{ padding: '20px', borderRadius: 18, background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)', border: 'none', color: 'white', fontWeight: 900, fontSize: '1rem', cursor: 'pointer' }}>{saving ? 'GUARDANDO...' : 'ACTUALIZAR PERFIL'}</button>
                         </div>
                     ) : (
-                        /* Info cards */
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 28 }}>
-                            {[
-                                { label: 'Especie', value: `${emoji} ${pet.species}`, icon: '🐾' },
-                                { label: 'Raza', value: pet.breed || 'No especificada', icon: '🏷️' },
-                                { label: 'Edad', value: calcAge(pet.birth_date), icon: '🎂' },
-                                { label: 'Peso', value: pet.weight_kg ? `${pet.weight_kg} kg` : 'No registrado', icon: '⚖️' },
-                            ].map(stat => (
-                                <div key={stat.label} style={{
-                                    background: 'rgba(13,13,25,0.7)', border: '1px solid rgba(108,63,245,0.1)',
-                                    borderRadius: 16, padding: '18px 20px',
-                                }}>
-                                    <div style={{ fontSize: '0.72rem', color: 'rgba(248,248,255,0.35)', fontWeight: 700, letterSpacing: '0.05em', marginBottom: 8 }}>
-                                        {stat.label.toUpperCase()}
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 40 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                <div style={{ background: 'rgba(108,63,245,0.07)', border: '1px solid rgba(108,63,245,0.15)', borderRadius: 32, padding: '40px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+                                        <div style={{ width: 50, height: 50, borderRadius: 16, background: 'rgba(108,63,245,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A78BFA' }}><Heart /></div>
+                                        <div><h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Cuidado Adaptive</h2><p style={{ margin: 0, opacity: 0.4, fontSize: '0.85rem' }}>Protocolo personalizado</p></div>
                                     </div>
-                                    <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '1rem' }}>
-                                        {stat.value}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                                        <div><div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#A78BFA', fontWeight: 800, fontSize: '0.7rem', marginBottom: 12 }}><Box size={14} /> ENTORNO</div><p style={{ fontSize: '0.95rem', lineHeight: 1.6, margin: 0, opacity: 0.7 }}>{profile?.habitat_notes || 'Sin datos.'}</p></div>
+                                        <div><div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#10B981', fontWeight: 800, fontSize: '0.7rem', marginBottom: 12 }}><Leaf size={14} /> DIETA</div><p style={{ fontSize: '0.95rem', lineHeight: 1.6, margin: 0, opacity: 0.7 }}>{profile?.dietary_requirements || 'Sin datos.'}</p></div>
                                     </div>
+                                    {profile?.specific_data && Object.keys(profile.specific_data).length > 0 && (
+                                        <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12 }}>
+                                            {Object.entries(profile.specific_data).map(([k, v]) => (
+                                                <div key={k} style={{ padding: '12px', borderRadius: 16, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)', textAlign: 'center' }}>
+                                                    <div style={{ fontSize: '0.6rem', fontWeight: 800, opacity: 0.3 }}>{k.toUpperCase()}</div>
+                                                    <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{v}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Photo Gallery (Available in both modes) */}
-                    <div style={{
-                        background: 'rgba(13,13,25,0.7)', border: '1px solid rgba(108,63,245,0.1)',
-                        borderRadius: 16, padding: '24px', marginBottom: 28
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.1rem', margin: 0 }}>
-                                📸 Galería de fotos ({petPhotos.length}/5)
-                            </h3>
-                            {editing && petPhotos.length < 5 && (
-                                <button onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery} style={{
-                                    padding: '6px 14px', borderRadius: 8, background: 'rgba(108,63,245,0.15)',
-                                    border: '1px solid rgba(108,63,245,0.3)', color: '#6C3FF5',
-                                    fontSize: '0.8rem', fontWeight: 700, cursor: uploadingGallery ? 'wait' : 'pointer',
-                                }}>
-                                    {uploadingGallery ? '⏳' : '+ Añadir foto'}
-                                </button>
-                            )}
-                        </div>
-                        
-                        {petPhotos.length === 0 ? (
-                            <p style={{ color: 'rgba(248,248,255,0.3)', fontSize: '0.85rem', margin: 0 }}>No hay fotos en la galería todavía.</p>
-                        ) : (
-                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                                {petPhotos.map(photo => (
-                                    <div key={photo.id} style={{ position: 'relative', width: 90, height: 90, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(108,63,245,0.2)' }}>
-                                        <img src={photo.photo_url} alt="Pet photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        {editing && (
-                                            <button 
-                                                onClick={() => handleDeleteGalleryPhoto(photo.id, photo.photo_url)}
-                                                style={{
-                                                    position: 'absolute', top: 4, right: 4, background: 'rgba(239,68,68,0.9)',
-                                                    border: 'none', color: 'white', width: 22, height: 22, borderRadius: '50%',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    fontSize: '0.65rem', cursor: 'pointer',
-                                                }}
-                                            >✖</button>
-                                        )}
-                                    </div>
-                                ))}
+                                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 32, padding: '40px' }}>
+                                    <h3 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1.2rem', fontWeight: 800, marginBottom: 20 }}>Próximos Eventos 📅</h3>
+                                    <Link href="/dashboard/calendar" style={{ display: 'inline-flex', padding: '12px 24px', borderRadius: 12, background: 'rgba(108,63,245,0.1)', color: '#A78BFA', textDecoration: 'none', fontWeight: 800, fontSize: '0.85rem' }}>IR AL CALENDARIO</Link>
+                                </div>
                             </div>
-                        )}
-                        {!editing && pet.wants_to_breed && (petPhotos.length + (pet.avatar_url ? 1 : 0) < 3) && (
-                            <div style={{ marginTop: 12, color: '#FF6B6B', fontSize: '0.8rem', fontWeight: 600 }}>
-                                ⚠️ Faltan fotos. Necesitas al menos 3 fotos (incluyendo la foto de perfil) para aparecer en Match (Montas).
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Quick links */}
-                    {!editing && (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-                            {[
-                                { icon: '💉', title: 'Cartilla Veterinaria', desc: 'Vacunas, revisiones y tratamientos', href: '/dashboard/health', color: '#6C3FF5' },
-                                { icon: '📸', title: 'Red Social', desc: 'Posts y fotos de la comunidad', href: '/dashboard/social', color: '#00D4FF' },
-                                { icon: '🚨', title: 'Alertas', desc: 'Mascotas perdidas en tu zona', href: '/dashboard/alerts', color: '#EF4444' },
-                            ].map(link => (
-                                <Link key={link.href} href={link.href} style={{ textDecoration: 'none' }}>
-                                    <div style={{
-                                        background: 'rgba(13,13,25,0.7)', border: `1px solid ${link.color}15`,
-                                        borderRadius: 16, padding: '20px', cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                    }}
-                                        onMouseEnter={e => { e.currentTarget.style.borderColor = `${link.color}35`; e.currentTarget.style.background = `${link.color}08` }}
-                                        onMouseLeave={e => { e.currentTarget.style.borderColor = `${link.color}15`; e.currentTarget.style.background = 'rgba(13,13,25,0.7)' }}>
-                                        <div style={{ fontSize: 26, marginBottom: 10 }}>{link.icon}</div>
-                                        <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.9rem', marginBottom: 4 }}>{link.title}</div>
-                                        <div style={{ color: 'rgba(248,248,255,0.38)', fontSize: '0.78rem' }}>{link.desc}</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 32, padding: '30px' }}>
+                                    <h3 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '1rem', fontWeight: 800, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}><Activity size={18} /> Vitales</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
+                                        <span style={{ fontSize: '0.85rem', opacity: 0.5 }}>Peso</span>
+                                        <span style={{ fontWeight: 800 }}>{pet.weight_kg ? `${pet.weight_kg} kg` : '--'}</span>
                                     </div>
-                                </Link>
-                            ))}
+                                    <Link href="/dashboard/wellness" style={{ display: 'block', textAlign: 'center', marginTop: 10, color: '#A78BFA', fontSize: '0.8rem', textDecoration: 'none' }}>VER HISTORIAL</Link>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
             </main>
+
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
+            <style jsx>{`
+                .dashboard-main { flex: 1; min-width: 0; background-color: #07070F; transition: all 0.3s; padding-left: 260px; position: relative; }
+                @media (max-width: 1024px) { .dashboard-main { padding-left: 0; } }
+                .noise-overlay { position: absolute; inset: 0; background-image: url('/noise.png'); opacity: 0.02; pointer-events: none; z-index: 0; }
+                @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
+            `}</style>
         </div>
     )
 }

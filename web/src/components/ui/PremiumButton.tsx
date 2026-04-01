@@ -39,11 +39,15 @@ export function PremiumButton({
     return (
         <motion.button
             whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`${baseClass} tap-bounce ${className}`}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+            className={`${baseClass} group ${className}`}
             {...props}
         >
-            {content}
+            <div className="flex items-center gap-2.5">
+                {icon && <span className="opacity-70 group-hover:opacity-100 transition-opacity">{icon}</span>}
+                <span className="font-bold tracking-tight">{children}</span>
+            </div>
         </motion.button>
     )
 }

@@ -14,9 +14,10 @@ export function GlassCard({ children, className = '', hover = true, delay = 0 }:
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay }}
-            className={`glass-card premium-card ${className} ${!hover ? 'no-hover' : ''}`}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay, ease: [0.23, 1, 0.32, 1] }}
+            className={`glass-card ${className} ${hover ? 'hover:scale-[1.01] hover:border-white/20 transition-all duration-500' : ''}`}
         >
             {children}
         </motion.div>

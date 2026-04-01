@@ -33,8 +33,11 @@ export function AuthContent() {
     useEffect(() => {
         const ref = searchParams.get('ref')
         if (ref) {
-            setRefCode(ref.toUpperCase().trim())
-            setMode('signup') // Auto-switch to signup when coming via invite link
+            const code = ref.toUpperCase().trim()
+            setRefCode(code)
+            setMode('signup')
+            // Almacenar en cookie para persistencia (2 horas)
+            document.cookie = `petnova_ref=${code}; path=/; max-age=7200; SameSite=Lax`
         }
     }, [searchParams])
 

@@ -16,6 +16,7 @@ import {
     PawPrint
 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
+import DashboardLayout from '@/components/DashboardLayout'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -84,32 +85,33 @@ export default function HealthPage() {
     const firstPet = pets[0]
 
     return (
-        <div className="dashboard-container">
-            <Sidebar />
-
-            <main className="dashboard-main lg:lg:ml-[260px]">
-                <div className="[&>nav]:mb-4"><Breadcrumbs items={[{ label: 'Salud' }]} /></div>
+        <DashboardLayout>
+            <div className="max-w-7xl mx-auto">
+                <Breadcrumbs items={[{ label: 'Salud' }]} />
                 <PageHeader
                     title="Cartilla Veterinaria"
                     subtitle="Historial médico completo de tus compañeros"
                     emoji="💉"
                     action={
-                        <div className="flex gap-3">
-                            <div className="relative">
-                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                        <div className="flex flex-wrap gap-4">
+                            <div className="relative group">
+                                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-[var(--primary)] transition-colors" size={16} />
                                 <select
                                     value={selectedPetId}
                                     onChange={e => setSelectedPetId(e.target.value)}
-                                    className="bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all cursor-pointer appearance-none"
+                                    className="bg-[var(--surface)] border border-[var(--border)] rounded-xl py-3 pl-10 pr-10 text-sm text-white font-bold focus:ring-2 focus:ring-[var(--primary)]/50 transition-all cursor-pointer appearance-none outline-none shadow-xl hover:bg-white/[0.08]"
                                 >
                                     <option value="all">Todas las mascotas</option>
                                     {pets.map(p => (
                                         <option key={p.id} value={p.id}>{p.name}</option>
                                     ))}
                                 </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
+                                    <Clock size={14} />
+                                </div>
                             </div>
                             <PremiumButton onClick={() => setShowModal(true)} icon={<Plus size={18} />}>
-                                Nuevo Registro
+                                NUEVO REGISTRO
                             </PremiumButton>
                         </div>
                     }
@@ -333,7 +335,7 @@ export default function HealthPage() {
                         </div>
                     </div>
                 )}
-            </main>
+            </div>
 
             <HealthRecordModal
                 show={showModal}
@@ -341,6 +343,6 @@ export default function HealthPage() {
                 pets={pets}
                 onSave={handleSave}
             />
-        </div>
+        </DashboardLayout>
     )
 }

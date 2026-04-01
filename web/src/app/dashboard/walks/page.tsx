@@ -3,10 +3,28 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
-import { PageHeader } from '@/components/ui/PageHeader'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+    MapPin, 
+    Calendar, 
+    Clock, 
+    TrendingUp, 
+    Trash2, 
+    ChevronRight,
+    Search,
+    Filter,
+    Plus,
+    Navigation,
+    Timer,
+    Zap,
+    Loader2
+} from 'lucide-react'
+import DashboardLayout from '@/components/DashboardLayout'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { GlassCard } from '@/components/ui/GlassCard'
+import { PremiumButton } from '@/components/ui/PremiumButton'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Walk {
@@ -30,24 +48,25 @@ const SPECIES_EMOJI: Record<string, string> = {
     Dog: '🐶', Cat: '🐱', Bird: '🐦', Fish: '🐠', Rabbit: '🐇', Hamster: '🐹', Reptile: '🦎', Other: '🐾',
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
 function timeAgo(dateStr: string): string {
     const diff = (Date.now() - new Date(dateStr).getTime()) / 1000
-    if (diff < 60) return 'hace un momento'
-    if (diff < 3600) return `hace ${Math.floor(diff / 60)}m`
-    if (diff < 86400) return `hace ${Math.floor(diff / 3600)}h`
-    return `hace ${Math.floor(diff / 86400)}d`
+    if (diff < 60) return 'Ahora'
+    if (diff < 3600) return `${Math.floor(diff / 60)}m`
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h`
+    return `${Math.floor(diff / 86400)}d`
 }
 
 function formatDuration(seconds: number): string {
     const h = Math.floor(seconds / 3600)
     const m = Math.floor((seconds % 3600) / 60)
     const s = Math.floor(seconds % 60)
-    if (h > 0) return `${h}h ${m}m ${s}s`
+    if (h > 0) return `${h}h ${m}m`
     if (m > 0) return `${m}m ${s}s`
     return `${s}s`
 }
 
-export default function WalksFeedPage() {
+export default function WalksPage() {
     const supabase = createClient()
     const router = useRouter()
 
@@ -55,7 +74,6 @@ export default function WalksFeedPage() {
     const [walks, setWalks] = useState<Walk[]>([])
     const [loading, setLoading] = useState(true)
 
-    // ── Load ────────────────────────────────────────────────────────────────────
     useEffect(() => {
         supabase.auth.getUser().then(async ({ data: { user } }) => {
             if (!user) { router.push('/auth'); return }
@@ -78,7 +96,6 @@ export default function WalksFeedPage() {
         setLoading(false)
     }
 
-    // ── Delete Walk ─────────────────────────────────────────────────────────────
     const handleDeleteWalk = async (walk: Walk) => {
         if (!confirm('¿Eliminar este paseo?')) return
         if (walk.image_url) {
@@ -89,134 +106,177 @@ export default function WalksFeedPage() {
         setWalks(prev => prev.filter(w => w.id !== walk.id))
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────//
     return (
-        <div className="min-h-screen bg-dark-bg text-white">
-            <Sidebar />
+        <DashboardLayout>
+            <div className="flex flex-col gap-8">
+                <Breadcrumbs items={[{ label: 'Paseos' }]} />
+                
+                <PageHeader 
+                    title="Aventuras" 
+                    subtitle="El historial de rutas y descubrimientos de la comunidad" 
+                    emoji="🌍"
+                    action={
+                        <Link href="/dashboard/walks/record" className="no-underline">
+                            <PremiumButton className="!px-6">
+                                <Plus size={18} className="mr-2" />
+                                NUEVO PASEO
+                            </PremiumButton>
+                        </Link>
+                    }
+                />
 
-            <main className="dashboard-main pb-20 px-6 sm:px-12">
-                <div className="max-w-[720px] mx-auto pt-6">
-                    <Breadcrumbs items={[{ label: 'Paseos' }]} />
-                    <PageHeader
-                        title="Paseos"
-                        emoji="🦮"
-                        subtitle="Descubre las rutas de la comunidad PetNova"
-                        action={
-                            <Link href="/dashboard/walks/record"
-                                className="px-6 py-3 rounded-xl border-none cursor-pointer font-outfit font-bold text-[0.85rem] transition-all flex items-center gap-2 bg-gradient-to-br from-[#00E5A0] to-[#00B37E] text-[#07070F] shadow-lg shadow-[#00E5A0]/20 hover:shadow-[#00E5A0]/40 hover:-translate-y-0.5"
-                                style={{ textDecoration: 'none' }}
+                <div className="max-w-4xl mx-auto w-full">
+                    <AnimatePresence mode="wait">
+                        {loading ? (
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex flex-col items-center justify-center py-32"
                             >
-                                📍 Empezar Paseo
-                            </Link>
-                        }
-                    />
+                                <Loader2 className="animate-spin text-primary mb-4" size={48} />
+                                <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Cargando rutas...</p>
+                            </motion.div>
+                        ) : walks.length === 0 ? (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-center py-32"
+                            >
+                                <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/10">
+                                    <Navigation className="text-primary/40" size={40} />
+                                </div>
+                                <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Sin huellas aún</h3>
+                                <p className="text-white/40 mb-8 max-w-sm mx-auto font-medium">Sé el primero en grabar una ruta con tu mascota y comienza a ganar PetCoins.</p>
+                                <Link href="/dashboard/walks/record" className="no-underline">
+                                    <PremiumButton>COMENZAR PRIMER PASEO</PremiumButton>
+                                </Link>
+                            </motion.div>
+                        ) : (
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="space-y-8 relative"
+                            >
+                                {/* Vertical Timeline Line */}
+                                <div className="absolute left-10 top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/5 to-transparent hidden md:block" />
 
-                    {/* Feed */}
-                    {loading ? (
-                        <div className="text-center py-[60px]">
-                            <div className="text-[40px] mb-3 text-[#00E5A0] animate-pulse">🦮</div>
-                            <p className="text-white/40 font-outfit">Cargando rutas de la comunidad...</p>
-                        </div>
-                    ) : walks.length === 0 ? (
-                        <div className="text-center py-[72px] px-6 bg-[#0D0D19]/70 border border-[#00E5A0]/20 rounded-[22px] shadow-[0_4px_30px_rgba(0,229,160,0.05)]">
-                            <div className="text-[64px] mb-[20px] grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default">🦮</div>
-                            <h2 className="font-outfit font-extrabold text-[1.4rem] mb-2.5 text-white">¡No hay paseos registrados!</h2>
-                            <p className="text-white/50 mb-[26px]">Sé pionero y graba la primera ruta con tu mascota para inaugurar la tabla de líderes.</p>
-                            <Link href="/dashboard/walks/record" className="inline-block px-8 py-[12px] rounded-[13px] border-none cursor-pointer bg-gradient-to-br from-[#00E5A0] to-[#00B37E] text-[#07070F] font-outfit font-bold text-[0.9rem] shadow-[0_4px_20px_rgba(0,229,160,0.4)] hover:shadow-[0_6px_24px_rgba(0,229,160,0.5)] hover:-translate-y-0.5 transition-all" style={{ textDecoration: 'none' }}>
-                                🏕️ Grabar Primer Paseo
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-6 relative">
-                            {/* Line connecting posts visually */}
-                            <div className="absolute left-[39px] top-4 bottom-10 w-px bg-gradient-to-b from-[#00E5A0]/40 via-primary/20 to-transparent z-0 hidden sm:block pointer-events-none"></div>
-
-                            {walks.map((walk, index) => (
-                                <div key={walk.id} className="relative z-10 sm:ml-[14px] bg-[#0D0D19]/90 backdrop-blur-xl border border-primary/20 rounded-[24px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:border-[#00E5A0]/40 transition-colors duration-300 group">
-
-                                    {/* Connection dot */}
-                                    <div className="absolute -left-[30px] top-[40px] w-3 h-3 rounded-full bg-[#0D0D19] border-[2px] border-[#00E5A0] shadow-[0_0_10px_#00E5A0] z-20 hidden sm:block group-hover:scale-150 transition-transform duration-300"></div>
-
-                                    {/* Header */}
-                                    <div className="px-5 pt-5 pb-3 flex justify-between items-start">
-                                        <div className="flex items-center gap-3.5">
-                                            <div className="w-[46px] h-[46px] rounded-[14px] bg-gradient-to-br from-[#00E5A0]/20 to-primary/20 border border-[#00E5A0]/30 flex items-center justify-center text-[22px] shrink-0 shadow-inner group-hover:rotate-12 transition-transform duration-500">
-                                                {walk.pet ? SPECIES_EMOJI[walk.pet.species] || '🐾' : '🧑'}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-[0.95rem] font-outfit text-white leading-tight">
-                                                    {walk.title || 'Paseo'}
-                                                </div>
-                                                <div className="text-[0.8rem] text-white/60 mt-0.5 flex items-center gap-1.5">
-                                                    <span className="text-[#00E5A0] font-semibold">{walk.profile?.display_name || 'Usuario'}</span>
-                                                    <span className="text-white/30">•</span>
-                                                    <span>{timeAgo(walk.created_at)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {walk.user_id === userId && (
-                                            <button onClick={() => handleDeleteWalk(walk)} className="bg-white/5 border border-white/10 rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-[0.85rem] text-white/40 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all">
-                                                ✕
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {/* Stats Bar */}
-                                    <div className="px-5 py-3 mx-5 mb-4 bg-black/40 rounded-xl border border-white/5 flex items-center justify-around">
-                                        <div className="text-center">
-                                            <div className="text-[0.65rem] text-white/50 uppercase tracking-wider font-bold mb-1">Distancia</div>
-                                            <div className="font-outfit font-bold text-[#00E5A0] text-[1.1rem]">
-                                                {walk.distance_km ? walk.distance_km.toFixed(2) : '0.00'} <span className="text-[0.75rem] text-white/50 font-normal">km</span>
-                                            </div>
-                                        </div>
-                                        <div className="w-px h-8 bg-white/10"></div>
-                                        <div className="text-center">
-                                            <div className="text-[0.65rem] text-white/50 uppercase tracking-wider font-bold mb-1">Duración</div>
-                                            <div className="font-outfit font-bold text-[#F59E0B] text-[1.1rem]">
-                                                {formatDuration(walk.duration_seconds)}
-                                            </div>
-                                        </div>
-                                        <div className="w-px h-8 bg-white/10"></div>
-                                        <div className="text-center">
-                                            <div className="text-[0.65rem] text-white/50 uppercase tracking-wider font-bold mb-1">Ritmo</div>
-                                            <div className="font-outfit font-bold text-[#FF6B9D] text-[1.1rem]">
-                                                {walk.distance_km > 0 ? Math.floor((walk.duration_seconds / 60) / walk.distance_km) : '--'}<span className="text-[0.75rem] text-white/50 font-normal">m/km</span>
-                                            </div>
-                                        </div>
-                                        {walk.earned_coins > 0 && (
-                                            <>
-                                                <div className="w-px h-8 bg-white/10"></div>
-                                                <div className="text-center">
-                                                    <div className="text-[0.65rem] text-[#F59E0B]/80 uppercase tracking-wider font-bold mb-1">Recompensa</div>
-                                                    <div className="font-outfit font-bold text-[#F59E0B] text-[1.1rem] flex items-center justify-center gap-1">
-                                                        +{walk.earned_coins} <span className="text-[0.9rem]">🪙</span>
+                                {walks.map((walk, idx) => (
+                                    <motion.div
+                                        key={walk.id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                    >
+                                        <GlassCard className="relative md:ml-16 overflow-hidden hover:border-primary/30 transition-all group">
+                                            {/* Top Banner for Pet */}
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <div className="relative">
+                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent border border-primary/20 flex items-center justify-center text-2xl shadow-inner group-hover:rotate-6 transition-transform duration-500">
+                                                        {walk.pet ? SPECIES_EMOJI[walk.pet.species || 'Other'] : '👤'}
+                                                    </div>
+                                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-black border border-white/10 flex items-center justify-center text-[10px] font-black text-primary">
+                                                        {idx + 1}
                                                     </div>
                                                 </div>
-                                            </>
-                                        )}
-                                    </div>
+                                                
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <h3 className="font-black text-lg uppercase tracking-tight text-white group-hover:text-primary transition-colors">
+                                                            {walk.title || 'Exploración PetNova'}
+                                                        </h3>
+                                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 bg-white/5 py-1 px-3 rounded-full border border-white/5">
+                                                            {timeAgo(walk.created_at)}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs font-bold text-white/40 flex items-center gap-2 mt-0.5">
+                                                        <span className="text-primary/60">{walk.profile?.display_name || 'Explorador'}</span>
+                                                        <span className="opacity-20">•</span>
+                                                        <span>con {walk.pet?.name || 'su mascota'}</span>
+                                                    </p>
+                                                </div>
 
-                                    {/* Image */}
-                                    {walk.image_url ? (
-                                        <div className="relative mx-5 mb-5 rounded-[16px] overflow-hidden border border-white/10 shadow-lg">
-                                            <img src={walk.image_url} alt="Walk snapshot" className="w-full h-[240px] sm:h-[320px] object-cover block group-hover:scale-105 transition-transform duration-700" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
-                                        </div>
-                                    ) : (
-                                        <div className="relative mx-5 mb-5 rounded-[16px] overflow-hidden border border-white/10 shadow-lg bg-[#121220] h-[240px] sm:h-[320px] flex items-center justify-center">
-                                            {/* Aquí iría el mini componente de mapa para el feed */}
-                                            <div className="text-white/20 flex flex-col items-center">
-                                                <div className="text-4xl mb-2">🗺️</div>
-                                                <div className="text-sm font-outfit">Recorrido del Paseo</div>
+                                                {walk.user_id === userId && (
+                                                    <button 
+                                                        onClick={() => handleDeleteWalk(walk)}
+                                                        className="p-2 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/40 hover:bg-red-500/20 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
                                             </div>
-                                        </div>
-                                    )}
+
+                                            {/* Stats Strip */}
+                                            <div className="grid grid-cols-3 gap-4 mb-6 bg-white/5 rounded-2xl border border-white/5 p-5 relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-1 h-full bg-primary/20" />
+                                                <div className="text-center md:text-left">
+                                                    <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest mb-1.5">
+                                                        <Navigation size={12} className="text-primary" /> Distancia
+                                                    </div>
+                                                    <div className="text-xl font-black text-white tabular-nums">
+                                                        {walk.distance_km?.toFixed(2)}<span className="text-[10px] ml-1 opacity-40">KM</span>
+                                                    </div>
+                                                </div>
+                                                <div className="text-center md:text-left border-x border-white/5 px-4">
+                                                    <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest mb-1.5">
+                                                        <Timer size={12} className="text-secondary" /> Tiempo
+                                                    </div>
+                                                    <div className="text-xl font-black text-white tabular-nums">
+                                                        {formatDuration(walk.duration_seconds)}
+                                                    </div>
+                                                </div>
+                                                <div className="text-center md:text-left">
+                                                    <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest mb-1.5">
+                                                        <Zap size={12} className="text-yellow-500" /> Recompensa
+                                                    </div>
+                                                    <div className="text-xl font-black text-yellow-500 tabular-nums">
+                                                        +{walk.earned_coins || 0} <span className="text-[10px] ml-0.5 opacity-60">PC</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Visual */}
+                                            <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/20 transition-all">
+                                                {walk.image_url ? (
+                                                    <img src={walk.image_url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Ruta" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-[#0A0A16] flex flex-col items-center justify-center p-8 text-center">
+                                                        <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/5 group-hover:scale-110 transition-transform">
+                                                            <MapPin className="text-white/20" size={32} />
+                                                        </div>
+                                                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Mapa de Exploración</div>
+                                                        {/* Decorative path */}
+                                                        <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none" viewBox="0 0 100 100">
+                                                            <path d="M10 50 Q 25 25, 40 50 T 70 50" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                                                
+                                                <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/60">
+                                                        <Calendar size={12} className="text-primary" />
+                                                        {new Date(walk.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
+                                                    </div>
+                                                    <Link href={`/dashboard/walks/${walk.id}`} className="no-underline">
+                                                        <button className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white hover:text-black transition-all flex items-center gap-2">
+                                                            Detalles <ChevronRight size={14} />
+                                                        </button>
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </GlassCard>
+                                    </motion.div>
+                                ))}
+                                
+                                <div className="text-center py-12">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/10">Has llegado al final</p>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }

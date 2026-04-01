@@ -1,85 +1,72 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+    Play, 
+    Pause, 
+    Square, 
+    MapPin, 
+    Timer, 
+    TrendingUp, 
+    X, 
+    ChevronRight,
+    Trophy,
+    Navigation,
+    Loader2
+} from 'lucide-react'
+import DashboardLayout from '@/components/DashboardLayout'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { GlassCard } from '@/components/ui/GlassCard'
+import { PremiumButton } from '@/components/ui/PremiumButton'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-interface Pet {
-    id: string
-    name: string
-    avatar_url: string | null
-    species: string
-}
-
+// ── Types & Constants ────────────────────────────────────────────────────────
 interface RoutePoint {
     lat: number
     lng: number
     timestamp: number
 }
 
-// Distance between two coordinates in km
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-    const R = 6371; // Radius of the earth in km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        ;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
+interface Pet {
+    id: string
+    name: string
+    avatar_url: string | null
 }
 
-function formatDuration(seconds: number): string {
-    const h = Math.floor(seconds / 3600)
-    const m = Math.floor((seconds % 3600) / 60)
-    const s = Math.floor(seconds % 60)
-    if (h > 0) return `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`
-    if (m > 0) return `${m}m ${s.toString().padStart(2, '0')}s`
-    return `${s}s`
-}
-
-// Dark map styles
 const DARK_STYLES = [
     { elementType: 'geometry', stylers: [{ color: '#0f0f1a' }] },
     { elementType: 'labels.text.stroke', stylers: [{ color: '#0f0f1a' }] },
     { elementType: 'labels.text.fill', stylers: [{ color: '#9ca3af' }] },
     { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1c1c2e' }] },
-    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#131325' }] },
     { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#030d1a' }] },
-    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
 ]
 
-declare global {
-    interface Window {
-        initWalkMap: () => void
-    }
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371 // km
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
 }
 
-export default function RecordWalkPage() {
+function formatDuration(seconds: number) {
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    const s = seconds % 60
+    return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+}
+
+export default function WalksRecordPage() {
     const supabase = createClient()
     const router = useRouter()
-
-    const [userId, setUserId] = useState<string | null>(null)
-    const [pets, setPets] = useState<Pet[]>([])
-    const [selectedPetId, setSelectedPetId] = useState<string>('')
-    const [walkTitle, setWalkTitle] = useState('Paseo matutino')
-
-    // Map & Geolocation State
-    const [mapReady, setMapReady] = useState(false)
-    const [isRecording, setIsRecording] = useState(false)
-    const [isPaused, setIsPaused] = useState(false)
-    const [route, setRoute] = useState<RoutePoint[]>([])
-    const [distanceKm, setDistanceKm] = useState(0)
-    const [durationSecs, setDurationSecs] = useState(0)
-    const [startTime, setStartTime] = useState<Date | null>(null)
-    const [saving, setSaving] = useState(false)
-    const [rewardToShow, setRewardToShow] = useState<number | null>(null)
-
+    
     // Refs
     const mapContainerRef = useRef<HTMLDivElement>(null)
     const mapInstanceRef = useRef<google.maps.Map | null>(null)
@@ -89,42 +76,72 @@ export default function RecordWalkPage() {
     const timerRef = useRef<NodeJS.Timeout | null>(null)
     const latestRouteRef = useRef<RoutePoint[]>([])
 
-    // ── Load User & Pets ────────────────────────────────────────────────────────
+    // State
+    const [userId, setUserId] = useState<string | null>(null)
+    const [mapReady, setMapReady] = useState(false)
+    const [isRecording, setIsRecording] = useState(false)
+    const [isPaused, setIsPaused] = useState(false)
+    const [route, setRoute] = useState<RoutePoint[]>([])
+    const [distanceKm, setDistanceKm] = useState(0)
+    const [durationSecs, setDurationSecs] = useState(0)
+    const [startTime, setStartTime] = useState<Date | null>(null)
+    const [pets, setPets] = useState<Pet[]>([])
+    const [selectedPetId, setSelectedPetId] = useState<string>('')
+    const [walkTitle, setWalkTitle] = useState('')
+    const [saving, setSaving] = useState(false)
+    const [rewardToShow, setRewardToShow] = useState<number | null>(null)
+
+    // ── Pre-run ──────────────────────────────────────────────────────────────────
     useEffect(() => {
-        supabase.auth.getUser().then(async ({ data: { user } }) => {
+        supabase.auth.getUser().then(({ data: { user } }) => {
             if (!user) { router.push('/auth'); return }
             setUserId(user.id)
-            const { data } = await supabase.from('pets').select('id, name, avatar_url, species').eq('user_id', user.id)
-            if (data && data.length > 0) {
-                setPets(data)
-                setSelectedPetId(data[0].id)
-            }
+            fetchPets(user.id)
         })
-    }, [])
 
-    // ── Load Maps Script ────────────────────────────────────────────────────────
-    useEffect(() => {
-        if (typeof window === 'undefined') return
-        if (window.google && window.google.maps) {
-            setMapReady(true)
-            return
+        async function fetchPets(uid: string) {
+            const { data } = await supabase.from('pets').select('id, name, avatar_url').eq('user_id', uid)
+            if (data) {
+                setPets(data)
+                if (data.length > 0) setSelectedPetId(data[0].id)
+            }
         }
-        window.initWalkMap = () => setMapReady(true)
-        const script = document.createElement('script')
-        const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ''
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=geometry&callback=initWalkMap`
-        script.async = true
-        script.defer = true
-        document.head.appendChild(script)
+
         return () => {
-            delete (window as any).initWalkMap
-            // cleanup map if unmounted
             if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current)
             if (timerRef.current) clearInterval(timerRef.current)
         }
     }, [])
 
-    // Initialize map once ready
+    // ── Robust Maps script loading ──────────────────────────────────────────────
+    useEffect(() => {
+        (window as any).onGoogleMapsLoaded = () => setMapReady(true)
+
+        if (window.google?.maps) {
+            setMapReady(true)
+            return
+        }
+
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]')
+        if (existingScript) {
+            const interval = setInterval(() => {
+                if (window.google?.maps) {
+                    setMapReady(true)
+                    clearInterval(interval)
+                }
+            }, 500)
+            return () => clearInterval(interval)
+        }
+
+        const script = document.createElement('script')
+        const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || ''
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&libraries=geometry&callback=onGoogleMapsLoaded&loading=async`
+        script.async = true
+        script.defer = true
+        document.head.appendChild(script)
+    }, [])
+
+    // ── Init map ────────────────────────────────────────────────────────────────
     useEffect(() => {
         if (!mapReady || !mapContainerRef.current || mapInstanceRef.current) return
 
@@ -156,7 +173,6 @@ export default function RecordWalkPage() {
             },
         })
 
-        // Ask for current pos immediately to center the map
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
@@ -164,354 +180,345 @@ export default function RecordWalkPage() {
                     mapInstanceRef.current?.setCenter(c)
                     markerRef.current?.setPosition(c)
                 },
-                (err) => console.log('Geolocation base error', err),
+                null,
                 { enableHighAccuracy: true }
             )
         }
     }, [mapReady])
 
-    // Update refs whenever state changes so async callbacks get latest
+    // Update refs whenever state changes
     useEffect(() => {
         latestRouteRef.current = route
     }, [route])
 
     // ── Recording Logic ─────────────────────────────────────────────────────────
-
     const startRecording = () => {
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by your browser')
-            return
-        }
-
+        if (!navigator.geolocation) return alert('Geolocation is not supported')
         setIsRecording(true)
         setIsPaused(false)
         setStartTime(new Date())
+        setRoute([])
+        setDistanceKm(0)
+        setDurationSecs(0)
 
-        // Start timer
-        timerRef.current = setInterval(() => {
-            setDurationSecs(prev => prev + 1)
-        }, 1000)
-
-        // Start tracking
+        timerRef.current = setInterval(() => setDurationSecs(prev => prev + 1), 1000)
         watchIdRef.current = navigator.geolocation.watchPosition(
-            (position) => {
-                // If paused, just update marker but do not add to route
-                const point: RoutePoint = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                    timestamp: position.timestamp
-                }
-
+            (pos) => {
+                const point: RoutePoint = { lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: pos.timestamp }
                 markerRef.current?.setPosition(point)
-
-                // Only center map if recording actively
                 mapInstanceRef.current?.setCenter(point)
-
-                setRoute(prevRoute => {
-                    // Update distance
-                    if (prevRoute.length > 0) {
-                        const lastPoint = prevRoute[prevRoute.length - 1]
-                        const dist = calculateDistance(lastPoint.lat, lastPoint.lng, point.lat, point.lng)
-                        // Ignore crazy large jumps (>1km in a tick) or 0
-                        if (dist > 0 && dist < 1) {
-                            setDistanceKm(d => d + dist)
-                        }
+                setRoute(prev => {
+                    if (prev.length > 0) {
+                        const last = prev[prev.length - 1]
+                        const dist = calculateDistance(last.lat, last.lng, point.lat, point.lng)
+                        if (dist > 0 && dist < 1) setDistanceKm(d => d + dist)
                     }
-
-                    const newRoute = [...prevRoute, point]
-
-                    // Update polyline
-                    if (polylineRef.current) {
-                        polylineRef.current.setPath(newRoute.map(p => ({ lat: p.lat, lng: p.lng })))
-                    }
-
-                    return newRoute
+                    const updated = [...prev, point]
+                    polylineRef.current?.setPath(updated.map(p => ({ lat: p.lat, lng: p.lng })))
+                    return updated
                 })
             },
-            (error) => {
-                console.error("Error watching position", error)
-            },
-            { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+            null,
+            { enableHighAccuracy: true, maximumAge: 5000, timeout: 5000 }
         )
     }
 
     const togglePause = () => {
         if (isPaused) {
-            // Resume
             setIsPaused(false)
-            timerRef.current = setInterval(() => {
-                setDurationSecs(prev => prev + 1)
-            }, 1000)
-            if (!watchIdRef.current) {
-                // Restart logic in effect
-            }
+            timerRef.current = setInterval(() => setDurationSecs(prev => prev + 1), 1000)
+            watchIdRef.current = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const point = { lat: pos.coords.latitude, lng: pos.coords.longitude, timestamp: pos.timestamp }
+                    markerRef.current?.setPosition(point)
+                    mapInstanceRef.current?.panTo(point)
+                    setRoute(prev => {
+                        if (prev.length > 0) {
+                            const last = prev[prev.length - 1]
+                            const dist = calculateDistance(last.lat, last.lng, point.lat, point.lng)
+                            if (dist < 1) setDistanceKm(d => d + dist)
+                        }
+                        const updated = [...prev, point]
+                        polylineRef.current?.setPath(updated)
+                        return updated
+                    })
+                },
+                null,
+                { enableHighAccuracy: true }
+            )
         } else {
-            // Pause
             setIsPaused(true)
             if (timerRef.current) clearInterval(timerRef.current)
-            if (watchIdRef.current) {
-                navigator.geolocation.clearWatch(watchIdRef.current)
-                watchIdRef.current = null
-            }
+            if (watchIdRef.current) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null }
         }
     }
 
-    // Effect to handle pause accurately
-    useEffect(() => {
-        if (!isRecording) return
-        if (isPaused) {
-            if (timerRef.current) clearInterval(timerRef.current)
-            if (watchIdRef.current) {
-                navigator.geolocation.clearWatch(watchIdRef.current)
-                watchIdRef.current = null
-            }
-        } else {
-            if (!timerRef.current) {
-                timerRef.current = setInterval(() => {
-                    setDurationSecs(prev => prev + 1)
-                }, 1000)
-            }
-            if (!watchIdRef.current) {
-                watchIdRef.current = navigator.geolocation.watchPosition(
-                    (position) => {
-                        const point = { lat: position.coords.latitude, lng: position.coords.longitude, timestamp: position.timestamp }
-                        markerRef.current?.setPosition(point)
-                        mapInstanceRef.current?.panTo(point)
-                        setRoute(prevRoute => {
-                            if (prevRoute.length > 0) {
-                                const lastPoint = prevRoute[prevRoute.length - 1]
-                                const dist = calculateDistance(lastPoint.lat, lastPoint.lng, point.lat, point.lng)
-                                if (dist < 1) setDistanceKm(d => d + dist)
-                            }
-                            const newRoute = [...prevRoute, point]
-                            if (polylineRef.current) polylineRef.current.setPath(newRoute)
-                            return newRoute
-                        })
-                    },
-                    (e) => console.error(e),
-                    { enableHighAccuracy: true }
-                )
-            }
-        }
-    }, [isPaused, isRecording])
-
     const finishWalk = async () => {
         if (route.length < 2 && distanceKm < 0.01) {
-            if (!confirm("El paseo es muy corto. ¿Finalizar de todos modos?")) return
+            if (!confirm("El paseo es muy corto. ¿Finalizar?")) return
         }
-
         setSaving(true)
         if (timerRef.current) clearInterval(timerRef.current)
         if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current)
 
-        const now = new Date()
-
-        // ── Petcoins Calculation ──
         let earnedCoins = 0
         const durationHours = durationSecs / 3600
         const avgSpeed = durationHours > 0 ? distanceKm / durationHours : 0
 
-        // Anti-cheat: avg speed <= 15 km/h
-        if (avgSpeed <= 15) {
-            if (distanceKm >= 1) {
-                earnedCoins += Math.floor(distanceKm) * 15
-            }
-            if (durationSecs >= 1800) {
-                earnedCoins += 20
-            }
-
+        if (avgSpeed <= 25) { // Relaxed for bikes/running
+            if (distanceKm >= 1) earnedCoins += Math.floor(distanceKm) * 15
+            if (durationSecs >= 1200) earnedCoins += 20
+            
             if (earnedCoins > 0 && userId) {
-                // Check daily limit (max 100 per day)
-                const startOfDay = new Date()
-                startOfDay.setHours(0, 0, 0, 0)
-
-                const { data: todayWalks } = await supabase
-                    .from('walks')
-                    .select('earned_coins')
-                    .eq('user_id', userId)
-                    .gte('created_at', startOfDay.toISOString())
-
-                const coinsEarnedToday = todayWalks?.reduce((sum, walk) => sum + (walk.earned_coins || 0), 0) || 0
-                const coinsAvailableToday = Math.max(0, 100 - coinsEarnedToday)
-
-                if (earnedCoins > coinsAvailableToday) {
-                    earnedCoins = coinsAvailableToday
-                }
+                const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0)
+                const { data: todayWalks } = await supabase.from('walks').select('earned_coins').eq('user_id', userId).gte('created_at', startOfDay.toISOString())
+                const coinsToday = todayWalks?.reduce((s, w) => s + (w.earned_coins || 0), 0) || 0
+                earnedCoins = Math.min(earnedCoins, Math.max(0, 150 - coinsToday))
             }
         }
 
         const { error } = await supabase.from('walks').insert({
             user_id: userId,
             pet_id: selectedPetId || null,
-            title: walkTitle || 'Paseo matutino',
+            title: walkTitle || 'Paseo PetNova',
             route: route,
             distance_km: distanceKm,
             duration_seconds: durationSecs,
-            start_time: startTime?.toISOString() || now.toISOString(),
-            end_time: now.toISOString(),
+            start_time: startTime?.toISOString() || new Date().toISOString(),
+            end_time: new Date().toISOString(),
             earned_coins: earnedCoins
         })
 
         if (!error && earnedCoins > 0) {
-            // Add coins to profile
             const { data: profile } = await supabase.from('profiles').select('pet_coins').eq('id', userId).single()
-            if (profile) {
-                await supabase.from('profiles').update({ pet_coins: (profile.pet_coins || 0) + earnedCoins }).eq('id', userId)
-            }
+            if (profile) await supabase.from('profiles').update({ pet_coins: (profile.pet_coins || 0) + earnedCoins }).eq('id', userId)
         }
 
         setSaving(false)
-        if (error) {
-            alert('Error guardando el paseo: ' + error.message)
-            return
-        }
-
-        if (earnedCoins > 0) {
-            setRewardToShow(earnedCoins)
-        } else {
-            router.push('/dashboard/walks')
-        }
+        if (error) alert('Error: ' + error.message)
+        else if (earnedCoins > 0) setRewardToShow(earnedCoins)
+        else router.push('/dashboard/walks')
     }
 
     const cancelWalk = () => {
-        if (!confirm('¿Descartar este paseo? Se perderán los datos grabados.')) return
+        if (!confirm('¿Descartar este paseo?')) return
         if (timerRef.current) clearInterval(timerRef.current)
         if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current)
         router.push('/dashboard/walks')
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────//
+    // ── Render ─────────────────────────────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-dark-bg text-white relative flex flex-col sm:flex-row">
-            <Sidebar />
+        <DashboardLayout>
+            <div className="flex flex-col h-[calc(100vh-140px)] gap-6 relative">
+                <Breadcrumbs items={[{ label: 'Paseos', href: '/dashboard/walks' }, { label: 'Grabar' }]} />
+                <PageHeader 
+                    title="Registrador de Paseos" 
+                    subtitle="Graba tu ruta y gana PetCoins por cada kilómetro" 
+                    emoji="🐕"
+                    action={
+                        isRecording && (
+                            <PremiumButton onClick={cancelWalk} className="bg-red-500/10 border-red-500/20 text-red-400 !px-4 hover:bg-red-500/20">
+                                DESCARTAR
+                            </PremiumButton>
+                        )
+                    }
+                />
+
+                <div className="flex-1 flex gap-6 relative min-h-0">
+                    {/* Map Background */}
+                    <GlassCard className="flex-1 relative overflow-hidden !p-0 border-white/5">
+                        <div ref={mapContainerRef} className="w-full h-full grayscale-[0.2] contrast-[1.1]" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                        
+                        {!mapReady && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-[#07070F] z-20">
+                                <Loader2 className="animate-spin text-primary" size={32} />
+                            </div>
+                        )}
+                    </GlassCard>
+
+                    {/* Controls Overlay */}
+                    <AnimatePresence mode="wait">
+                        {!isRecording ? (
+                            <motion.div
+                                key="setup"
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 50 }}
+                                className="w-96 shrink-0 flex flex-col gap-4"
+                            >
+                                <GlassCard className="p-6 border-white/10">
+                                    <h3 className="font-black text-lg mb-6 flex items-center gap-2">
+                                        <Play className="text-primary" size={20} fill="currentColor" />
+                                        Nuevo Paseo
+                                    </h3>
+                                    
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-white/40 block mb-2">Nombre de la ruta</label>
+                                            <input
+                                                type="text"
+                                                value={walkTitle}
+                                                onChange={e => setWalkTitle(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-primary/50 transition-colors font-bold text-sm"
+                                                placeholder="Ej: Vuelta por el Retiro"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-white/40 block mb-2">Compañero de paseo</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {pets.map(pet => (
+                                                    <button
+                                                        key={pet.id}
+                                                        onClick={() => setSelectedPetId(pet.id)}
+                                                        className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${
+                                                            selectedPetId === pet.id
+                                                            ? 'bg-primary/10 border-primary text-white'
+                                                            : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        <div className="w-8 h-8 rounded-full bg-white/10 overflow-hidden shrink-0 border border-white/10">
+                                                            {pet.avatar_url ? <img src={pet.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs">🐾</div>}
+                                                        </div>
+                                                        <span className="font-bold text-xs truncate">{pet.name}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <PremiumButton onClick={startRecording} className="w-full !py-4 text-sm mt-4">
+                                            COMENZAR RASTREO
+                                        </PremiumButton>
+                                    </div>
+                                </GlassCard>
+
+                                <GlassCard className="p-4 border-white/5 bg-primary/5">
+                                    <div className="flex items-center gap-4 text-primary">
+                                        <TrendingUp size={20} />
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-tighter">Bono PetNova</p>
+                                            <p className="text-xs font-bold text-white/80">Gana 15 PetCoins por cada km</p>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="active"
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="absolute bottom-6 left-6 right-6 z-30"
+                            >
+                                <GlassCard className="max-w-3xl mx-auto p-8 border-white/20 shadow-[0_32px_64px_rgba(0,0,0,0.8)] !bg-black/60 backdrop-blur-3xl overflow-visible">
+                                    {/* Stats Grid */}
+                                    <div className="grid grid-cols-3 gap-8 mb-8">
+                                        <div className="text-center group">
+                                            <div className="flex items-center justify-center gap-2 text-white/40 mb-2 font-black uppercase tracking-[0.2em] text-[10px]">
+                                                <Timer size={14} /> Tiempo
+                                            </div>
+                                            <div className="text-4xl font-black text-white tabular-nums drop-shadow-2xl">
+                                                {formatDuration(durationSecs)}
+                                            </div>
+                                        </div>
+                                        <div className="w-px h-12 bg-white/10 invisible sm:visible" />
+                                        <div className="text-center">
+                                            <div className="flex items-center justify-center gap-2 text-white/40 mb-2 font-black uppercase tracking-[0.2em] text-[10px]">
+                                                <Navigation size={14} /> Distancia
+                                            </div>
+                                            <div className="text-4xl font-black text-primary tabular-nums drop-shadow-2xl">
+                                                {distanceKm.toFixed(2)}<span className="text-sm ml-1 opacity-40">KM</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={togglePause}
+                                            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all border-2 ${
+                                                isPaused 
+                                                ? 'bg-primary/20 border-primary text-primary hover:bg-primary/30' 
+                                                : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20 hover:text-white'
+                                            }`}
+                                        >
+                                            {isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
+                                            {isPaused ? 'REANUDAR' : 'PAUSAR'}
+                                        </button>
+                                        <button
+                                            onClick={finishWalk}
+                                            disabled={saving}
+                                            className="flex-[2] bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-xs py-4 rounded-2xl transition-all shadow-[0_0_40px_rgba(239,68,68,0.3)] flex items-center justify-center gap-3 disabled:opacity-50"
+                                        >
+                                            {saving ? <Loader2 className="animate-spin" size={18} /> : <Square size={16} fill="currentColor" />}
+                                            {saving ? 'GUARDANDO...' : 'FINALIZAR PASEO'}
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Floating Pet Indicator */}
+                                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black border border-white/20 px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl">
+                                        <div className="w-6 h-6 rounded-full bg-primary/20 overflow-hidden ring-1 ring-primary/40">
+                                            {pets.find(p => p.id === selectedPetId)?.avatar_url ? (
+                                                <img src={pets.find(p => p.id === selectedPetId)?.avatar_url!} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-[10px]">🐾</div>
+                                            )}
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Paseando con {pets.find(p => p.id === selectedPetId)?.name}</span>
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
 
             {/* Reward Modal */}
-            {rewardToShow !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#07070F]/90 backdrop-blur-sm">
-                    <div className="bg-[#0D0D19] border border-[#F59E0B]/30 rounded-[32px] p-8 max-w-sm w-full text-center shadow-[0_0_80px_rgba(245,158,11,0.2)] animate-in zoom-in-95 duration-500">
-                        <div className="text-[80px] mb-4 animate-[bounce_2s_infinite]">🪙</div>
-                        <h2 className="text-3xl font-outfit font-extrabold text-[#F59E0B] mb-2">¡Paseo Completado!</h2>
-                        <p className="text-white/70 mb-8 font-outfit text-sm">Tú y tu mascota habéis hecho un gran trabajo. Has ganado:</p>
-                        <div className="text-6xl font-outfit font-black text-white mb-8 flex items-end justify-center gap-2">
-                            +{rewardToShow} <span className="text-2xl font-bold text-[#F59E0B] mb-2">PC</span>
-                        </div>
-                        <button
-                            onClick={() => router.push('/dashboard/walks')}
-                            className="w-full bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white font-bold font-outfit py-4 rounded-xl hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all text-lg"
+            <AnimatePresence>
+                {rewardToShow !== null && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            className="w-full max-w-md"
                         >
-                            Continuar
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            <main className="dashboard-main flex-1 flex flex-col h-screen overflow-hidden relative">
-
-                {/* Fixed Map Background */}
-                <div className="absolute inset-0 z-0">
-                    <div ref={mapContainerRef} className="w-full h-full" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#07070F] via-transparent pointer-events-none" />
-                </div>
-
-                {/* Top UI */}
-                <div className="relative z-10 p-6 sm:p-8 shrink-0">
-                    <div className="flex items-center justify-between mb-4">
-                        <h1 className="text-2xl font-outfit font-extrabold text-[#00E5A0] drop-shadow-md">Grabar Paseo</h1>
-                        <button onClick={cancelWalk} className="text-white/60 hover:text-white bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-sm backdrop-blur-md">
-                            ✕ Cancelar
-                        </button>
-                    </div>
-
-                    {!isRecording && (
-                        <div className="bg-[#0D0D19]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 sm:p-5 max-w-sm shadow-2xl">
-                            <label className="block text-sm text-white/60 mb-1.5 font-outfit">Título del paseo</label>
-                            <input
-                                type="text"
-                                value={walkTitle}
-                                onChange={e => setWalkTitle(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none focus:border-[#00E5A0]/50 mb-4 transition-colors font-outfit"
-                                placeholder="Ej: Paseo por la playa"
-                            />
-
-                            <label className="block text-sm text-white/60 mb-1.5 font-outfit">¿Con quién paseas?</label>
-                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-4">
-                                {pets.map(pet => (
-                                    <button
-                                        key={pet.id}
-                                        onClick={() => setSelectedPetId(pet.id)}
-                                        className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${selectedPetId === pet.id
-                                            ? 'bg-[#00E5A0]/20 border-[#00E5A0] text-[#00E5A0]'
-                                            : 'bg-white/5 border-transparent text-white/60 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        <div className="w-6 h-6 rounded-full overflow-hidden bg-white/10 flex items-center justify-center text-xs">
-                                            {pet.avatar_url ? <img src={pet.avatar_url} className="w-full h-full object-cover" /> : '🐾'}
-                                        </div>
-                                        <span className="font-outfit font-medium text-sm">{pet.name}</span>
-                                    </button>
-                                ))}
-                                {pets.length === 0 && (
-                                    <div className="text-white/40 text-sm">No tienes mascotas registradas</div>
-                                )}
-                            </div>
-
-                            <button
-                                onClick={startRecording}
-                                className="w-full bg-gradient-to-r from-[#00E5A0] to-[#00B37E] text-[#07070F] font-bold font-outfit py-3.5 rounded-xl text-lg hover:shadow-[0_0_20px_rgba(0,229,160,0.4)] transition-all flex items-center justify-center gap-2 mt-2"
-                            >
-                                <span className="text-xl">▶</span> Empezar
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Dashboard Stats (Bottom overlay) */}
-                {isRecording && (
-                    <div className="relative z-10 mt-auto p-6 pb-20 sm:pb-8 w-full">
-                        <div className="max-w-md mx-auto relative group">
-                            <div className="absolute inset-0 bg-[#00E5A0] rounded-3xl blur-[30px] opacity-10 group-hover:opacity-20 transition-opacity duration-1000"></div>
-
-                            <div className="bg-[#0D0D19]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl relative">
-                                <div className="flex justify-between items-center mb-6">
-                                    <div className="text-center flex-1">
-                                        <div className="text-sm text-white/50 uppercase tracking-wider font-bold mb-1">Duración</div>
-                                        <div className="font-outfit font-light text-4xl text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
-                                            {formatDuration(durationSecs)}
-                                        </div>
-                                    </div>
-                                    <div className="w-px h-12 bg-white/10 mx-2"></div>
-                                    <div className="text-center flex-1">
-                                        <div className="text-sm text-white/50 uppercase tracking-wider font-bold mb-1">Distancia</div>
-                                        <div className="font-outfit font-light text-4xl text-[#00E5A0] drop-shadow-[0_0_8px_rgba(0,229,160,0.4)]">
-                                            {distanceKm.toFixed(2)}<span className="text-lg text-white/40 ml-1">km</span>
-                                        </div>
-                                    </div>
+                            <GlassCard className="p-10 border-yellow-500/20 text-center relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-yellow-500/50" />
+                                <motion.div 
+                                    animate={{ 
+                                        rotateY: [0, 180, 360],
+                                        scale: [1, 1.2, 1]
+                                    }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                    className="text-8xl mb-8 inline-block"
+                                >
+                                    🪙
+                                </motion.div>
+                                <h2 className="text-4xl font-black mb-4 bg-gradient-to-r from-yellow-300 to-yellow-600 bg-clip-text text-transparent">
+                                    ¡EXCELENTE TRABAJO!
+                                </h2>
+                                <p className="text-white/40 font-bold mb-8 uppercase tracking-widest text-xs">Recompensa por el paseo</p>
+                                
+                                <div className="text-7xl font-black text-white mb-10 tracking-tighter">
+                                    +{rewardToShow} <span className="text-2xl text-yellow-500 font-black">PC</span>
                                 </div>
-
-                                <div className="flex gap-4">
-                                    <button
-                                        onClick={togglePause}
-                                        className={`flex-1 py-4 rounded-2xl font-outfit font-bold text-lg transition-all flex items-center justify-center gap-2 border ${isPaused
-                                            ? 'bg-[#00E5A0]/10 border-[#00E5A0]/50 text-[#00E5A0] hover:bg-[#00E5A0]/20'
-                                            : 'bg-[#F59E0B]/10 border-[#F59E0B]/50 text-[#F59E0B] hover:bg-[#F59E0B]/20'
-                                            }`}
-                                    >
-                                        {isPaused ? '▶ Reanudar' : '⏸ Pausar'}
-                                    </button>
-
-                                    <button
-                                        onClick={finishWalk}
-                                        disabled={saving}
-                                        className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white border-none py-4 rounded-2xl font-outfit font-bold text-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                        {saving ? 'Guardando...' : '⬛ Finalizar'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                
+                                <button
+                                    onClick={() => router.push('/dashboard/walks')}
+                                    className="w-full bg-white text-black font-black uppercase tracking-widest text-sm py-5 rounded-2xl hover:bg-yellow-500 hover:text-white transition-all shadow-2xl"
+                                >
+                                    RECOGER RECOMPENSA
+                                </button>
+                            </GlassCard>
+                        </motion.div>
+                    </motion.div>
                 )}
-            </main>
-        </div>
+            </AnimatePresence>
+        </DashboardLayout>
     )
 }

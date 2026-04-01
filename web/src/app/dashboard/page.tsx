@@ -12,6 +12,7 @@ import { StatCard } from '@/components/ui/StatCard'
 import { ProactiveTip } from '@/components/ui/ProactiveTip'
 import { PetList } from '@/components/PetList'
 import { UpcomingEvents } from '@/components/UpcomingEvents'
+import DashboardLayout from '@/components/DashboardLayout'
 
 export default function DashboardPage() {
     const { userId, profile, loading: loadingUser } = useUser()
@@ -43,51 +44,45 @@ export default function DashboardPage() {
     ]
 
     return (
-        <div className="dashboard-container">
-            <Sidebar />
-            <main className="dashboard-main lg:ml-[260px] relative min-h-screen">
-                <div className="noise-overlay pointer-events-none" />
-                
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[80px] pb-[120px] lg:pt-8 lg:pb-8">
-                    <PageHeader
-                        title={`¡Hola de nuevo, ${displayName}!`}
-                        subtitle={today}
-                        emoji="✨"
-                        action={
-                            <PremiumButton href="/dashboard/pets/new" icon={<Plus size={18} />}>
-                                Nueva Mascota
-                            </PremiumButton>
-                        }
-                    />
+        <DashboardLayout>
+            <div className="max-w-7xl mx-auto">
+                <PageHeader
+                    title={`¡Hola de nuevo, ${displayName}!`}
+                    subtitle={today}
+                    emoji="✨"
+                    action={
+                        <PremiumButton href="/dashboard/pets/new" icon={<Plus size={18} />}>
+                            NUEVA MASCOTA
+                        </PremiumButton>
+                    }
+                />
 
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-                        {metrics.map((m, i) => (
-                            <StatCard key={m.label} {...m} delay={i * 0.1} />
-                        ))}
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+                    {metrics.map((m, i) => (
+                        <StatCard key={m.label} {...m} delay={i * 0.1} />
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Main Content Area */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <PetList pets={pets} />
+
+                        {/* Proactive Tip / PetBot AI */}
+                        {pets.length > 0 && (
+                            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
+                                <ProactiveTip pet={pets[0]} />
+                            </motion.div>
+                        )}
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Main Content Area */}
-                        <div className="lg:col-span-2 space-y-8">
-                            <PetList pets={pets} />
-
-                            {/* Proactive Tip / PetBot AI */}
-                            {pets.length > 0 && (
-                                <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
-                                    <ProactiveTip pet={pets[0]} />
-                                </motion.div>
-                            )}
-                        </div>
-
-                        {/* Secondary Actions / Notifications */}
-                        <div className="space-y-6">
-                            <UpcomingEvents userId={userId} />
-                        </div>
+                    {/* Secondary Actions / Notifications */}
+                    <div className="space-y-6">
+                        <UpcomingEvents userId={userId} />
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </DashboardLayout>
     )
 }
-

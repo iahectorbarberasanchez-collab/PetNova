@@ -17,14 +17,17 @@ import {
     Clock,
     Camera,
     X,
-    Filter,
+    PawPrint,
+    Filter as FilterIcon,
+    AlertTriangle,
     Dog,
     Cat,
     Bird,
-    Rabbit,
-    PawPrint
+    Rabbit
 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
+import DashboardLayout from '@/components/DashboardLayout'
+import Breadcrumbs from '@/components/Breadcrumbs'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -246,24 +249,24 @@ export default function AlertsPage() {
 
 
     return (
-        <div className="dashboard-container">
-            <Sidebar />
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleImagePick}
-            />
+        <DashboardLayout>
+            <div className="max-w-7xl mx-auto">
+                <Breadcrumbs items={[{ label: 'Alertas' }]} />
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImagePick}
+                />
 
-            <main className="dashboard-main">
                 <PageHeader
                     title="Alertas Solidarias"
                     subtitle="Ayuda a reunir mascotas con sus familias"
                     emoji="🚨"
                     action={
                         <PremiumButton onClick={() => setShowForm(true)} icon={<Plus size={18} />}>
-                            Publicar Alerta
+                            PUBLICAR ALERTA
                         </PremiumButton>
                     }
                 />
@@ -443,192 +446,205 @@ export default function AlertsPage() {
                         ))}
                     </motion.div>
                 )}
-            </main>
 
-            {/* Modal de Alerta */}
-            <AnimatePresence>
-                {showForm && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-                            onClick={() => setShowForm(false)}
-                        />
+                {/* Modal de Alerta */}
+                <AnimatePresence>
+                    {showForm && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+                                onClick={() => setShowForm(false)}
+                            />
 
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="w-full max-w-2xl z-5 relative"
-                        >
-                            <GlassCard className="p-8 border-primary/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-                                <div className="flex justify-between items-center mb-8">
-                                    <div>
-                                        <h2 className="text-2xl font-black">Publicar Alerta</h2>
-                                        <p className="text-white/40 text-sm">Completa los datos para ayudar a la comunidad</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowForm(false)}
-                                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    {/* Tipo de Alerta Selector */}
-                                    <div className="flex gap-4">
-                                        {(['lost', 'found'] as const).map(t => (
-                                            <button
-                                                key={t}
-                                                type="button"
-                                                onClick={() => setFType(t)}
-                                                className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border-2 transition-all font-bold ${fType === t
-                                                    ? (t === 'lost' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400')
-                                                    : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
-                                                    }`}
-                                            >
-                                                {t === 'lost' ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
-                                                {t === 'lost' ? 'He perdido a mi mascota' : 'He encontrado una mascota'}
-                                            </button>
-                                        ))}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="w-full max-w-2xl z-10 relative"
+                            >
+                                <GlassCard className="p-6 md:p-10 border-primary/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[90vh] overflow-y-auto custom-scrollbar">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <div>
+                                            <h2 className="text-3xl font-black tracking-tight">Publicar Alerta</h2>
+                                            <p className="text-white/40 text-sm mt-1">Completa los datos para ayudar a la comunidad</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowForm(false)}
+                                            className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all hover:rotate-90"
+                                        >
+                                            <X size={24} />
+                                        </button>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Nombre / Descripción Corta</label>
-                                            <div className="relative">
+                                    <form onSubmit={handleSubmit} className="space-y-8">
+                                        {/* Tipo de Alerta Selector */}
+                                        <div className="flex gap-4">
+                                            {(['lost', 'found'] as const).map(t => (
+                                                <button
+                                                    key={t}
+                                                    type="button"
+                                                    onClick={() => setFType(t)}
+                                                    className={`flex-1 flex flex-col items-center justify-center gap-3 py-6 rounded-3xl border-2 transition-all group relative overflow-hidden ${fType === t
+                                                        ? (t === 'lost' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400')
+                                                        : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:border-white/10'
+                                                        }`}
+                                                >
+                                                    <div className={`p-3 rounded-2xl transition-transform group-hover:scale-110 ${fType === t ? 'bg-current/10' : 'bg-white/5'}`}>
+                                                        {t === 'lost' ? <AlertCircle size={24} /> : <CheckCircle2 size={24} />}
+                                                    </div>
+                                                    <span className="font-black uppercase tracking-widest text-[10px]">
+                                                        {t === 'lost' ? 'Perdido' : 'Encontrado'}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Nombre / Referencia</label>
                                                 <input
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-white/20"
                                                     value={fName}
                                                     onChange={e => setFName(e.target.value)}
                                                     placeholder="Ej: Rex, Golden Retriever..."
                                                     required
                                                 />
                                             </div>
-                                        </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Especie</label>
-                                            <select
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
-                                                value={fSpecies}
-                                                onChange={e => setFSpecies(e.target.value)}
-                                            >
-                                                {SPECIES_OPTIONS.map(o => (
-                                                    <option key={o.value} value={o.value} className="bg-[#121220]">
-                                                        {o.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Especie</label>
+                                                <div className="relative">
+                                                    <select
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer font-bold"
+                                                        value={fSpecies}
+                                                        onChange={e => setFSpecies(e.target.value)}
+                                                    >
+                                                        {SPECIES_OPTIONS.map(o => (
+                                                            <option key={o.value} value={o.value} className="bg-[#0A0A14]">
+                                                                {o.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 truncate">
+                                                        <PawPrint size={18} />
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Lugar Visto Por Última Vez</label>
-                                            <div className="relative">
-                                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={16} />
-                                                <input
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none focus:border-primary/50 transition-all"
-                                                    value={fLocation}
-                                                    onChange={e => setFLocation(e.target.value)}
-                                                    placeholder="Ej: Barrio de Gracia, Barcelona"
-                                                    required
-                                                />
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Ubicación</label>
+                                                <div className="relative">
+                                                    <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={18} />
+                                                    <input
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-white/20"
+                                                        value={fLocation}
+                                                        onChange={e => setFLocation(e.target.value)}
+                                                        placeholder="Ej: Barrio de Gracia, Barcelona"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Fecha</label>
+                                                <div className="relative">
+                                                    <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={18} />
+                                                    <input
+                                                        type="date"
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-5 text-white focus:outline-none focus:border-primary/50 transition-all color-scheme-dark font-bold"
+                                                        value={fDate}
+                                                        onChange={e => setFDate(e.target.value)}
+                                                        max={new Date().toISOString().split('T')[0]}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Teléfono</label>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={18} />
+                                                    <input
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-white/20"
+                                                        value={fPhone}
+                                                        onChange={e => setFPhone(e.target.value)}
+                                                        placeholder="+34 600 000 000"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Email</label>
+                                                <div className="relative">
+                                                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-primary" size={18} />
+                                                    <input
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold placeholder:text-white/20"
+                                                        value={fEmail}
+                                                        onChange={e => setFEmail(e.target.value)}
+                                                        placeholder="tu@email.com"
+                                                        type="email"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Fecha</label>
-                                            <div className="relative">
-                                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={16} />
-                                                <input
-                                                    type="date"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none focus:border-primary/50 transition-all color-scheme-dark"
-                                                    value={fDate}
-                                                    onChange={e => setFDate(e.target.value)}
-                                                    max={new Date().toISOString().split('T')[0]}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Teléfono (WhatsApp)</label>
-                                            <input
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all"
-                                                value={fPhone}
-                                                onChange={e => setFPhone(e.target.value)}
-                                                placeholder="+34 600 000 000"
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Descripción Detallada</label>
+                                            <textarea
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-primary/50 transition-all min-h-[120px] resize-none font-medium placeholder:text-white/20"
+                                                value={fDesc}
+                                                onChange={e => setFDesc(e.target.value)}
+                                                placeholder="Señas particulares, collar, comportamiento..."
                                             />
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Email</label>
-                                            <input
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all"
-                                                value={fEmail}
-                                                onChange={e => setFEmail(e.target.value)}
-                                                placeholder="tu@email.com"
-                                                type="email"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-white/40 uppercase tracking-widest pl-1">Más detalles (Color, raza, señas...)</label>
-                                        <textarea
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-primary/50 transition-all min-h-[100px] resize-none"
-                                            value={fDesc}
-                                            onChange={e => setFDesc(e.target.value)}
-                                            placeholder="Detalles que ayuden a identificar..."
-                                        />
-                                    </div>
-
-                                    <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="relative group cursor-pointer"
-                                    >
-                                        {imagePreview ? (
-                                            <div className="relative h-48 rounded-2xl overflow-hidden">
-                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <Camera size={32} className="text-white" />
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(null); }}
-                                                    className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 flex items-center justify-center"
-                                                >
-                                                    <X size={16} />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="border-2 border-dashed border-white/10 rounded-2xl p-10 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 hover:border-primary/30 transition-all group">
-                                                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                                    <Camera className="text-primary" size={24} />
-                                                </div>
-                                                <p className="text-sm font-bold">Subir foto de la mascota</p>
-                                                <p className="text-xs text-white/30 mt-1">Opcional, pero muy recomendado</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="pt-4">
-                                        <PremiumButton
-                                            type="submit"
-                                            className="w-full"
-                                            disabled={submitting || !fName.trim() || !fLocation.trim()}
+                                        <div
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="relative group cursor-pointer"
                                         >
-                                            {submitting ? 'Publicando...' : 'Publicar Alerta Ahora'}
-                                        </PremiumButton>
-                                    </div>
-                                </form>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+                                            {imagePreview ? (
+                                                <div className="relative h-60 rounded-3xl overflow-hidden shadow-2xl">
+                                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-sm">
+                                                        <Camera size={40} className="text-white scale-90 group-hover:scale-100 transition-transform" />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(null); }}
+                                                        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center transition-colors shadow-lg"
+                                                    >
+                                                        <X size={20} />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="border-2 border-dashed border-white/10 rounded-3xl p-12 flex flex-col items-center justify-center bg-white/[0.02] hover:bg-white/[0.05] hover:border-primary/30 transition-all group">
+                                                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-xl">
+                                                        <Camera className="text-primary" size={28} />
+                                                    </div>
+                                                    <p className="text-lg font-black tracking-tight">Subir foto de la mascota</p>
+                                                    <p className="text-sm text-white/30 mt-1 font-medium italic">Opcional, pero muy recomendado</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="pt-6">
+                                            <PremiumButton
+                                                type="submit"
+                                                className="w-full !py-5"
+                                                disabled={submitting || !fName.trim() || !fLocation.trim()}
+                                            >
+                                                {submitting ? 'PUBLICANDO ALERTA...' : 'PUBLICAR ALERTA EN LA COMUNIDAD'}
+                                            </PremiumButton>
+                                        </div>
+                                    </form>
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </DashboardLayout>
     )
 }
