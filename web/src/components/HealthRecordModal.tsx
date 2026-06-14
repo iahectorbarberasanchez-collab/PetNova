@@ -17,13 +17,13 @@ import {
 } from 'lucide-react'
 import { GlassCard } from './ui/GlassCard'
 import { PremiumButton } from './ui/PremiumButton'
-import { Pet } from '@/lib/types'
+import { Pet, HealthRecord } from '@/lib/types'
 
 interface HealthRecordModalProps {
   show: boolean
   onClose: () => void
   pets: Pet[]
-  onSave: (record: any) => Promise<void>
+  onSave: (record: Omit<HealthRecord, 'id' | 'created_at'>) => Promise<void>
 }
 
 const RECORD_TYPES = [
@@ -54,7 +54,7 @@ export function HealthRecordModal({ show, onClose, pets, onSave }: HealthRecordM
     try {
       await onSave({
         pet_id: fPetId,
-        record_type: fType,
+        record_type: fType as unknown as HealthRecord['record_type'],
         title: fTitle.trim(),
         date_administered: fDate,
         next_due_date: fNextDate || null,
@@ -62,8 +62,8 @@ export function HealthRecordModal({ show, onClose, pets, onSave }: HealthRecordM
       })
       onClose()
       setFTitle(''); setFType('vaccine'); setFNextDate(''); setFNotes('')
-    } catch (error: any) {
-      setFError(error.message)
+    } catch (error) {
+      setFError(error instanceof Error ? error.message : 'Error desconocido')
     } finally {
       setFSaving(false)
     }

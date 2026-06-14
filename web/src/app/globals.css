@@ -143,12 +143,13 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.85rem;
     font-weight: 600;
     border-radius: 10px;
-    padding: 8px 14px;
+    padding: 10px 16px;
     transition: all 0.2s;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    min-height: 44px;
 }
 
 .btn-ghost:hover {
@@ -167,6 +168,10 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(108, 63, 245, 0.3);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-primary:hover {
@@ -181,8 +186,12 @@ h1, h2, h3, h4, h5, h6 {
     color: #EF4444;
     cursor: pointer;
     border-radius: 10px;
-    padding: 8px 12px;
+    padding: 10px 16px;
     transition: all 0.2s;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-danger:hover {
@@ -202,4 +211,16 @@ h1, h2, h3, h4, h5, h6 {
     --purple-light: #8B5CF6;
     --cyan: #00D4FF;
     --green: #00E5A0;
+}
+
+/* --- Blog and Rich Text media scaling --- */
+.blog-content img, 
+.blog-content video, 
+.blog-content iframe {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    margin: 1.5rem auto;
+    display: block;
+    border: 1px solid var(--border);
 }

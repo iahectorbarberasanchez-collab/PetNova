@@ -10,7 +10,7 @@ interface PetCardProps {
   isDeleting: boolean
 }
 
-const SPECIES_ICONS: Record<string, any> = {
+const SPECIES_ICONS: Record<string, React.ElementType> = {
   Dog: PawPrint,
   Cat: PawPrint,
   Bird: PawPrint,

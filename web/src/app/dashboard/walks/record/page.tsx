@@ -8,17 +8,13 @@ import {
     Play, 
     Pause, 
     Square, 
-    MapPin, 
     Timer, 
     TrendingUp, 
-    X, 
-    ChevronRight,
-    Trophy,
     Navigation,
     Loader2
 } from 'lucide-react'
-import DashboardLayout from '@/components/DashboardLayout'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -111,14 +107,14 @@ export default function WalksRecordPage() {
             if (watchIdRef.current) navigator.geolocation.clearWatch(watchIdRef.current)
             if (timerRef.current) clearInterval(timerRef.current)
         }
-    }, [])
+    }, [supabase, router])
 
     // ── Robust Maps script loading ──────────────────────────────────────────────
     useEffect(() => {
-        (window as any).onGoogleMapsLoaded = () => setMapReady(true)
+        (window as Window & { onGoogleMapsLoaded?: () => void }).onGoogleMapsLoaded = () => setMapReady(true)
 
         if (window.google?.maps) {
-            setMapReady(true)
+            setTimeout(() => setMapReady(true), 0)
             return
         }
 
@@ -307,6 +303,8 @@ export default function WalksRecordPage() {
         router.push('/dashboard/walks')
     }
 
+    const activePet = pets.find(p => p.id === selectedPetId)
+
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
         <DashboardLayout>
@@ -380,7 +378,7 @@ export default function WalksRecordPage() {
                                                         }`}
                                                     >
                                                         <div className="w-8 h-8 rounded-full bg-white/10 overflow-hidden shrink-0 border border-white/10">
-                                                            {pet.avatar_url ? <img src={pet.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs">🐾</div>}
+                                                            {pet.avatar_url ? <img src={pet.avatar_url} alt={pet.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs">🐾</div>}
                                                         </div>
                                                         <span className="font-bold text-xs truncate">{pet.name}</span>
                                                     </button>
@@ -459,13 +457,13 @@ export default function WalksRecordPage() {
                                     {/* Floating Pet Indicator */}
                                     <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black border border-white/20 px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl">
                                         <div className="w-6 h-6 rounded-full bg-primary/20 overflow-hidden ring-1 ring-primary/40">
-                                            {pets.find(p => p.id === selectedPetId)?.avatar_url ? (
-                                                <img src={pets.find(p => p.id === selectedPetId)?.avatar_url!} className="w-full h-full object-cover" />
+                                            {activePet?.avatar_url ? (
+                                                <img src={activePet.avatar_url} alt={activePet.name || 'Mascota'} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-[10px]">🐾</div>
                                             )}
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Paseando con {pets.find(p => p.id === selectedPetId)?.name}</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Paseando con {activePet?.name || 'mascota'}</span>
                                     </div>
                                 </GlassCard>
                             </motion.div>

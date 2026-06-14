@@ -1,0 +1,362 @@
+{
+  "name": "PetNova - Content Factory",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "value": 1,
+              "expression": ""
+            }
+          ]
+        }
+      },
+      "id": "cb1e5b8e-d90f-48d6-96b6-9ca8974a2b91",
+      "name": "Schedule Trigger (Semanal)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a90dfb78-cb73-4f91-88f1-c4be1bb9db9a",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "BLOG_API_KEY",
+              "value": "petnova-blog-secret-2026-n8n"
+            },
+            {
+              "name": "SITE_URL",
+              "value": "https://petnexa.vercel.app"
+            },
+            {
+              "name": "GEMINI_API_KEY",
+              "value": "AIzaSyALq3-OTNadLIbwoZHzu8dL6qrvlXTA9wA"
+            }
+          ]
+        }
+      },
+      "id": "e932b12f-920f-4b08-8e6d-7cb80f89fa6e",
+      "name": "Configuraciones",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        420,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={{$node[\"Configuraciones\"].json[\"GEMINI_API_KEY\"]}}",
+        "sendHeaders": true,
+        "headers": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={\n  \"parts\": [\n    {\n      \"text\": \"Eres un experto estratega SEO y redactor especialista en mascotas en España. Tu objetivo es proponer un tema de blog único, de alto impacto y de gran interés para dueños de perros y gatos para el mes actual: Mayo. El tema debe resolver una preocupación real de la temporada primaveral en España (alergias, parásitos, paseos con calor, muda de pelo, etc.). Devuelve obligatoriamente y sin texto adicional un objeto JSON puro con el siguiente formato exacto: { \\\"tema\\\": \\\"Título sugerido para el artículo, con gancho y keyword SEO integrada\\\", \\\"categoria\\\": \\\"Elige una entre: 'Consejos', 'Salud', 'Nutrición', 'Comportamiento', 'Adopción', 'Noticias'\\\", \\\"keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\", \\\"keyword3\\\"], \\\"razonamiento_estacional\\\": \\\"Explicación breve de por qué este artículo es idóneo para publicar en Mayo en España\\\" }\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc8e3d09-bca1-4fa2-938b-cb8e9f2a09cb",
+      "name": "Gemini - Brainstorming",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        640,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = items[0].json.candidates[0].content.parts[0].text;\n// Limpiar posibles marcas de markdown ```json\nconst cleanText = text.replace(/```json\\s?|```/g, '').trim();\nreturn { json: JSON.parse(cleanText) };"
+      },
+      "id": "ca1e98bc-cb4f-4a0b-9c3f-ca8f3d09cb8b",
+      "name": "Parse Brainstorm JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={{$node[\"Configuraciones\"].json[\"GEMINI_API_KEY\"]}}",
+        "sendHeaders": true,
+        "headers": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={\n  \"parts\": [\n    {\n      \"text\": \"Actúa como el redactor jefe de PetNova, experto en veterinaria y comportamiento animal. Escribe un artículo de blog completo de aproximadamente 1000 a 1200 palabras basado en el tema: \\\"\" + $node[\"Parse Brainstorm JSON\"].json[\"tema\"] + \"\\\".\\n\\n### Instrucciones de Formato:\\n1. Debes generar el cuerpo del artículo en formato HTML semántico limpio.\\n2. Usa etiquetas como <p>, <h2>, <h3>, <strong>, <ul>, <li>. No utilices cabeceras de documento completo (<html>, <head>, <body>, etc.) ni clases CSS. Solo marcado de texto HTML estándar.\\n3. El tono debe ser cercano, empático, educativo y muy profesional.\\n4. Integra sutilmente las palabras clave: \" + $node[\"Parse Brainstorm JSON\"].json[\"keywords\"].join(', ') + \".\\n5. Incluye una sección de consejos prácticos al final con un listado <ul> / <li>.\\n6. El slug debe coincidir con el tema en formato kebab-case (letras minúsculas, guiones, sin acentos ni caracteres especiales).\\n\\nDevuelve obligatoriamente y sin comentarios ni texto fuera del bloque un objeto JSON válido con este formato:\\n{\\n  \\\"title\\\": \\\"El título final optimizado para SEO\\\",\\n  \\\"slug\\\": \\\"slug-del-articulo-en-formato-kebab-case\\\",\\n  \\\"category\\\": \\\"\" + $node[\"Parse Brainstorm JSON\"].json[\"categoria\"] + \"\\\",\\n  \\\"excerpt\\\": \\\"Un resumen corto y sugerente del artículo de 140 a 150 caracteres para la tarjeta del blog.\\\",\\n  \\\"tags\\\": [\\\"\" + $node[\"Parse Brainstorm JSON\"].json[\"keywords\"].join('\\\", \\\"') + \"\\\"],\\n  \\\"author\\\": \\\"Equipo Veterinario de PetNova\\\",\\n  \\\"content\\\": \\\"CUERPO_DEL_ARTICULO_EN_HTML_SEMANTICO (aquí insertas todo el artículo con las etiquetas HTML indicadas, escapando correctamente las comillas dobles que utilices dentro del texto)\\\"\\n}\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "da1f8c0e-d90f-48d6-9cb6-de908ca7cb1a",
+      "name": "Gemini - Redacción",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1060,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = items[0].json.candidates[0].content.parts[0].text;\nconst cleanText = text.replace(/```json\\s?|```/g, '').trim();\nreturn { json: JSON.parse(cleanText) };"
+      },
+      "id": "ea2a3f0e-e2cf-4bda-9cb6-de8cb7ca209b",
+      "name": "Parse Redacción JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.unsplash.com/photos/random?query=dog,cat,pet&client_id=SUA_UNSPLASH_ACCESS_KEY_AQUI",
+        "options": {}
+      },
+      "id": "fa1b8c0e-ebcf-4bda-9ca6-fe8cb7ca309c",
+      "name": "Unsplash - Imagen de Portada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1460,
+        220
+      ],
+      "notesInFlow": true,
+      "notes": "Reemplazar SUA_UNSPLASH_ACCESS_KEY_AQUI por tu clave de Unsplash API gratuita. Si no la tienes, puedes usar una URL estática de respaldo."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$node[\"Configuraciones\"].json[\"SITE_URL\"]}}/api/blog",
+        "sendHeaders": true,
+        "headers": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "={{$node[\"Configuraciones\"].json[\"BLOG_API_KEY\"]}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{$node[\"Parse Redacción JSON\"].json[\"title\"]}}"
+            },
+            {
+              "name": "content",
+              "value": "={{$node[\"Parse Redacción JSON\"].json[\"content\"]}}"
+            },
+            {
+              "name": "excerpt",
+              "value": "={{$node[\"Parse Redacción JSON\"].json[\"excerpt\"]}}"
+            },
+            {
+              "name": "cover_image_url",
+              "value": "={{$node[\"Unsplash - Imagen de Portada\"].json[\"urls\"] ? $node[\"Unsplash - Imagen de Portada\"].json[\"urls\"][\"regular\"] : \"https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1000\"}}"
+            },
+            {
+              "name": "category",
+              "value": "={{$node[\"Parse Redacción JSON\"].json[\"category\"]}}"
+            },
+            {
+              "name": "tags",
+              "value": "={{$node[\"Parse Redacción JSON\"].json[\"tags\"]}}"
+            },
+            {
+              "name": "slug",
+              "value": "={{$node[\"Parse Redacción JSON\"].json[\"slug\"]}}"
+            },
+            {
+              "name": "published",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ga1b8c0e-fbcf-4bda-9ca6-fe8cb7ca409d",
+      "name": "Publicar en Next.js",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1680,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "TU_CHAT_ID_TELEGRAM",
+        "text": "=🎉 **¡NUEVO ARTÍCULO PUBLICADO EN PETNOVA!** 🐾\n\n📖 **Título**: {{$node[\"Parse Redacción JSON\"].json[\"title\"]}}\n🏷️ **Categoría**: {{$node[\"Parse Redacción JSON\"].json[\"category\"]}}\n⏱️ **Lectura**: ~{{$node[\"Publicar en Next.js\"].json[\"post\"][\"read_time_minutes\"]}} min\n\n🔗 **Enlace**: {{$node[\"Publicar en Next.js\"].json[\"post\"][\"url\"]}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ha1b8c0e-fbcf-4bda-9ca6-fe8cb7ca509e",
+      "name": "Notificación Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1880,
+        220
+      ],
+      "notesInFlow": true,
+      "notes": "Configurar tus credenciales de bot de Telegram y Chat ID para recibir avisos."
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configuraciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger (Semanal)": {
+      "main": [
+        [
+          {
+            "node": "Configuraciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuraciones": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Brainstorming",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Brainstorming": {
+      "main": [
+        [
+          {
+            "node": "Parse Brainstorm JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Brainstorm JSON": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Redacción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Redacción": {
+      "main": [
+        [
+          {
+            "node": "Parse Redacción JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Redacción JSON": {
+      "main": [
+        [
+          {
+            "node": "Unsplash - Imagen de Portada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unsplash - Imagen de Portada": {
+      "main": [
+        [
+          {
+            "node": "Publicar en Next.js",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar en Next.js": {
+      "main": [
+        [
+          {
+            "node": "Notificación Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -10,7 +10,7 @@ interface UpcomingEventsProps {
   userId?: string | null
 }
 
-export function UpcomingEvents({ userId }: UpcomingEventsProps) {
+export function UpcomingEvents({}: UpcomingEventsProps) {
   // Enriqueceremos esto para que busque los registros de salud de todas las mascotas del usuario
   // Por ahora, asumimos que useHealthRecords sin petId trae los del usuario actual si la RLS lo permite
   const { records, loading } = useHealthRecords()
@@ -75,7 +75,7 @@ export function UpcomingEvents({ userId }: UpcomingEventsProps) {
         )}
       </div>
 
-      <button className="w-full mt-6 py-3 rounded-xl bg-[#00D4FF]/10 text-[#00D4FF] text-[11px] font-bold uppercase tracking-widest hover:bg-[#00D4FF]/20 transition-all">
+      <button className="w-full mt-6 py-3.5 rounded-xl bg-[#00D4FF]/10 text-[#00D4FF] text-[11px] font-bold uppercase tracking-widest hover:bg-[#00D4FF]/20 transition-all min-h-[44px]">
         Gestionar Calendario
       </button>
     </GlassCard>

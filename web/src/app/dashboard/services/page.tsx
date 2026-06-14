@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import ServicesClient from './ServicesClient'
-import { JsonLd } from '@/components/JsonLd'
+import { JsonLd } from '@/components/common/JsonLd'
 
 export const metadata: Metadata = {
     title: 'Servicios para Mascotas | PetNova',

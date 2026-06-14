@@ -9,7 +9,11 @@ export function usePets(userId: string | null) {
   const supabase = useMemo(() => createClient(), [])
 
   const fetchPets = useCallback(async () => {
-    if (!userId) return
+    if (!userId) {
+      setPets([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     const { data, error: petError } = await supabase
       .from('pets')
@@ -35,7 +39,10 @@ export function usePets(userId: string | null) {
   }, [supabase])
 
   useEffect(() => {
-    fetchPets()
+    const timer = setTimeout(() => {
+      fetchPets()
+    }, 0)
+    return () => clearTimeout(timer)
   }, [fetchPets])
 
   return { pets, loading, error, refreshPets: fetchPets, deletePet }

@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { motion, AnimatePresence } from 'framer-motion'
+
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface Profile {
@@ -68,7 +68,7 @@ export default function SettingsPage() {
     const [nSaving, setNSaving] = useState(false)
 
     // Password
-    const [pwCurrent, setPwCurrent] = useState('')
+
     const [pwNew, setPwNew] = useState('')
     const [pwConfirm, setPwConfirm] = useState('')
     const [pwSaving, setPwSaving] = useState(false)
@@ -95,7 +95,7 @@ export default function SettingsPage() {
                 setUserId(user.id)
 
                 // Upsert profile row (ensures it exists)
-                const { data: prof, error: upsertError } = await supabase
+                const { data: prof } = await supabase
                     .from('profiles')
                     .upsert({ id: user.id }, { onConflict: 'id' })
                     .select()
@@ -131,7 +131,7 @@ export default function SettingsPage() {
             isMounted = false
             clearTimeout(timeout)
         }
-    }, [])
+    }, [router, supabase])
 
     // ── Save profile ──────────────────────────────────────────────────────────
     const saveProfile = async () => {
@@ -172,7 +172,7 @@ export default function SettingsPage() {
         const { error } = await supabase.auth.updateUser({ password: pwNew })
         if (error) { setPwMsg({ type: 'err', text: error.message }); setPwSaving(false); return }
         setPwMsg({ type: 'ok', text: '✅ Contraseña actualizada correctamente' })
-        setPwCurrent(''); setPwNew(''); setPwConfirm('')
+        setPwNew(''); setPwConfirm('')
         setPwSaving(false)
         setTimeout(() => setPwMsg(null), 4000)
     }

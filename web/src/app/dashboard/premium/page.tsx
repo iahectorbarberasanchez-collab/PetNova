@@ -1,16 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
+
 
 export default function PremiumPage() {
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly')
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
+
 
     const handleSubscribe = async () => {
         setLoading(true)

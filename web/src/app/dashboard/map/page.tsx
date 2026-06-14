@@ -9,9 +9,7 @@ import {
     MapPin, 
     Navigation, 
     Star, 
-    Clock, 
     X,
-    Filter as FilterIcon,
     Stethoscope,
     Trees as Park,
     ShoppingBag,
@@ -20,8 +18,8 @@ import {
     SearchCheck,
     Loader2
 } from 'lucide-react'
-import DashboardLayout from '@/components/DashboardLayout'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -59,7 +57,7 @@ const createSvgElement = (color: string, icon: React.ReactNode) => {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         " class="map-marker-pin">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                ${(icon as any).props.children}
+                ${(icon as React.ReactElement<{ children: React.ReactNode }>).props.children}
             </svg>
         </div>
     `
@@ -129,17 +127,17 @@ export default function MapPage() {
             if (!user) router.push('/auth')
             else setAuthLoading(false)
         })
-    }, [])
+    }, [router, supabase])
 
     // ── Robust Maps script loading ──────────────────────────────────────────────
     useEffect(() => {
         if (authLoading) return
         
         // Use a persistent callback name to avoid redeclaration issues
-        (window as any).onGoogleMapsLoaded = () => setMapReady(true)
+        (window as Window & { onGoogleMapsLoaded?: () => void }).onGoogleMapsLoaded = () => setMapReady(true)
 
         if (window.google?.maps) {
-            setMapReady(true)
+            setTimeout(() => setMapReady(true), 0)
             return
         }
 
@@ -163,7 +161,7 @@ export default function MapPage() {
         script.async = true
         script.defer = true
         document.head.appendChild(script)
-    }, [authLoading])
+    }, [authLoading, MAPS_KEY])
 
     // ── Init map ────────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -221,7 +219,7 @@ export default function MapPage() {
                 () => setLocError('No se pudo obtener tu ubicación. Mostrando predeterminado.')
             )
         }
-    }, [mapReady])
+    }, [mapReady, userPos])
 
     // ── Search & Filters ────────────────────────────────────────────────────────
     const clearMarkers = () => {
@@ -276,7 +274,7 @@ export default function MapPage() {
                     address: r.formatted_address || r.vicinity || '',
                     rating: r.rating,
                     lat, lng,
-                    isOpen: (r as any).opening_hours?.isOpen?.()
+                    isOpen: (r as { opening_hours?: { isOpen?: () => boolean } }).opening_hours?.isOpen?.()
                 }
                 found.push(place)
                 bounds.extend({ lat, lng })

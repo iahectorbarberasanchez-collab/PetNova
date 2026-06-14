@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Sidebar from '@/components/Sidebar'
-import { Utensils, Zap, Plus, Trash2, Calendar, Coffee, Sun, Moon, Star, Info } from 'lucide-react'
+import Sidebar from '@/components/layout/Sidebar'
+import { Utensils, Zap, Plus, Trash2, Coffee, Sun, Moon, Star, Info } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // --- Types ---
@@ -26,7 +26,7 @@ export default function NutritionPage() {
     const [pets, setPets] = useState<Pet[]>([])
     const [selectedPetId, setSelectedPetId] = useState<string>('')
     const [foodLogs, setFoodLogs] = useState<FoodLog[]>([])
-    const [loading, setLoading] = useState(true)
+
     const [showModal, setShowModal] = useState(false)
 
     // Form inputs
@@ -36,15 +36,7 @@ export default function NutritionPage() {
     const [calories, setCalories] = useState('')
     const [foodType, setFoodType] = useState('Dry')
 
-    useEffect(() => {
-        fetchInitial()
-    }, [])
-
-    useEffect(() => {
-        if (selectedPetId) fetchPetLogs(selectedPetId)
-    }, [selectedPetId])
-
-    const fetchInitial = async () => {
+    const fetchInitial = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         const { data: petsData } = await supabase.from('pets').select('id, name, species').eq('owner_id', user.id)
@@ -52,11 +44,9 @@ export default function NutritionPage() {
             setPets(petsData)
             setSelectedPetId(petsData[0].id)
         }
-        setLoading(false)
-    }
+    }, [supabase])
 
-    const fetchPetLogs = async (petId: string) => {
-        const today = new Date().toISOString().split('T')[0]
+    const fetchPetLogs = useCallback(async (petId: string) => {
         const { data } = await supabase.from('pet_nutrition_logs')
             .select('*')
             .eq('pet_id', petId)
@@ -64,7 +54,23 @@ export default function NutritionPage() {
             .order('recorded_at', { ascending: false })
             .limit(20)
         setFoodLogs(data || [])
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchInitial()
+        }, 0)
+        return () => clearTimeout(timer)
+    }, [fetchInitial])
+
+    useEffect(() => {
+        if (selectedPetId) {
+            const timer = setTimeout(() => {
+                fetchPetLogs(selectedPetId)
+            }, 0)
+            return () => clearTimeout(timer)
+        }
+    }, [selectedPetId, fetchPetLogs])
 
     const handleAddLog = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -159,7 +165,7 @@ export default function NutritionPage() {
                             <div style={{ background: 'rgba(13,13,25,0.6)', borderRadius: 28, border: '1px solid rgba(255,255,255,0.05)', padding: 30 }}>
                                 <h4 style={{ margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}><Info size={18} color="#00D4FF" /> Resumen Nutricional</h4>
                                 <div style={{ fontSize: '0.85rem', lineHeight: 1.6, opacity: 0.5 }}>
-                                    La alimentación balanceada previene enfermedades metabólicas. Asegúrate de registrar también el agua consumida en "Notas de Hábitat".
+                                    La alimentación balanceada previene enfermedades metabólicas. Asegúrate de registrar también el agua consumida en &ldquo;Notas de Hábitat&rdquo;.
                                 </div>
                             </div>
                         </div>

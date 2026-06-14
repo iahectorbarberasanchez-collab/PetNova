@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
@@ -54,9 +54,7 @@ export default function ServicesClient() {
     const [searchQuery, setSearchQuery] = useState('')
     const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
-    useEffect(() => { fetchProviders() }, [activeCategory])
-
-    const fetchProviders = async () => {
+    const fetchProviders = useCallback(async () => {
         setLoading(true)
         const { data } = await supabase
             .from('service_providers')
@@ -68,7 +66,14 @@ export default function ServicesClient() {
         }
         setProviders(list)
         setLoading(false)
-    }
+    }, [activeCategory, supabase])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchProviders()
+        }, 0)
+        return () => clearTimeout(timer)
+    }, [activeCategory, fetchProviders])
 
     const filtered = providers.filter(p => {
         const name = p.profiles?.full_name || 'Demo'
@@ -182,7 +187,7 @@ export default function ServicesClient() {
 
                 {/* Grid */}
                 {loading ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px,1fr))', gap: 20 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px,1fr))', gap: 20 }}>
                         {[1, 2, 3].map(i => (
                             <div key={i} style={{ height: 260, borderRadius: 20, background: 'rgba(13,13,25,0.7)', border: '1px solid rgba(108,63,245,0.08)', animation: 'pulse 1.8s ease-in-out infinite', opacity: 0.5 }} />
                         ))}
@@ -211,7 +216,7 @@ export default function ServicesClient() {
                         </Link>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px,1fr))', gap: 22 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px,1fr))', gap: 22 }}>
                         {filtered.map(p => {
                             const minPrice = getMinPrice(p)
                             const cats = getCategories(p)

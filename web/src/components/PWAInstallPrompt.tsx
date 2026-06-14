@@ -2,22 +2,29 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Smartphone, Download, Share2 } from 'lucide-react'
+import { X, Share2 } from 'lucide-react'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
 
 export default function PWAInstallPrompt() {
-  const [installPrompt, setInstallPrompt] = useState<any>(null)
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
+  const [isIOS] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream
+  })
 
   useEffect(() => {
     // Check if it's iOS
-    const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-    setIsIOS(isIosDevice)
+    const isIosDevice = isIOS
 
     // Handle Android/Chrome install prompt
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
-      setInstallPrompt(e)
+      setInstallPrompt(e as BeforeInstallPromptEvent)
       
       // Only show if not already installed and not dismissed recently
       const dismissedAt = localStorage.getItem('pwa_prompt_dismissed_at')
@@ -37,14 +44,14 @@ export default function PWAInstallPrompt() {
       const now = Date.now()
       // Show every 48 hours for iOS
       if (!lastPrompt || now - parseInt(lastPrompt) > 48 * 60 * 60 * 1000) {
-        setIsVisible(true)
+        setTimeout(() => setIsVisible(true), 0)
       }
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
-  }, [])
+  }, [isIOS])
 
   const handleInstall = async () => {
     if (!installPrompt) return

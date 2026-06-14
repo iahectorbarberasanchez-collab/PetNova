@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import Sidebar from '@/components/layout/Sidebar'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 
 interface Product {
     id: string
@@ -42,14 +42,7 @@ export default function ShopPage() {
     const [userSpecies, setUserSpecies] = useState<string[]>([])
     const [imgErrors, setImgErrors] = useState<Set<string>>(new Set())
 
-    useEffect(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (!user) router.push('/auth')
-            else fetchData()
-        })
-    }, [])
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true)
         try {
             const { data: { user } } = await supabase.auth.getUser()
@@ -76,7 +69,14 @@ export default function ShopPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (!user) router.push('/auth')
+            else fetchData()
+        })
+    }, [router, supabase, fetchData])
 
     const filteredProducts = products.filter(p => {
         if (activeCategory !== 'All' && p.category !== activeCategory) return false
@@ -168,7 +168,6 @@ export default function ShopPage() {
                                                     </div>
                                                 </div>
                                             ) : (
-                                                /* eslint-disable-next-line @next/next/no-img-element */
                                                 <img
                                                     src={product.image_url}
                                                     alt={product.title}

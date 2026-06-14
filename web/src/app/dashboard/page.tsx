@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useUser } from '@/hooks/useUser'
-import Sidebar from '@/components/Sidebar'
 import { motion } from 'framer-motion'
 import { Plus, PawPrint, Activity, Heart, Bell } from 'lucide-react'
 import { usePets } from '@/hooks/usePets'
@@ -10,11 +10,12 @@ import { PremiumButton } from '@/components/ui/PremiumButton'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { StatCard } from '@/components/ui/StatCard'
 import { ProactiveTip } from '@/components/ui/ProactiveTip'
-import { PetList } from '@/components/PetList'
+import { PetList } from '@/components/common/PetList'
 import { UpcomingEvents } from '@/components/UpcomingEvents'
-import DashboardLayout from '@/components/DashboardLayout'
+import DashboardLayout from '@/components/layout/DashboardLayout'
 
 export default function DashboardPage() {
+    const router = useRouter()
     const { userId, profile, loading: loadingUser } = useUser()
     const [mounted, setMounted] = useState(false)
     const [today] = useState(() => new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }))
@@ -22,12 +23,20 @@ export default function DashboardPage() {
     const { pets, loading: loadingPets } = usePets(userId)
 
     useEffect(() => {
-        setMounted(true)
+        const timer = setTimeout(() => setMounted(true), 0)
+        return () => clearTimeout(timer)
     }, [])
+
+    // Redirección defensiva del lado del cliente en caso de que falle el middleware
+    useEffect(() => {
+        if (mounted && !loadingUser && !userId) {
+            router.replace('/auth')
+        }
+    }, [mounted, loadingUser, userId, router])
 
     const displayName = profile?.display_name || 'Aventurero'
 
-    if (!mounted || loadingUser || loadingPets) return (
+    if (!mounted || loadingUser || loadingPets || !userId) return (
         <div className="min-h-screen flex items-center justify-center bg-[#07070F]">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
                 <div className="text-4xl mb-4 animate-bounce">🐾</div>

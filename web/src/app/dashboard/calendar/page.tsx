@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Sidebar from '@/components/Sidebar'
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Bell, Trash2, CheckCircle2 } from 'lucide-react'
+import Sidebar from '@/components/layout/Sidebar'
+import { ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // --- Types ---
@@ -30,9 +30,8 @@ export default function CalendarPage() {
     const [currentDate, setCurrentDate] = useState(new Date())
     const [events, setEvents] = useState<CalendarEvent[]>([])
     const [pets, setPets] = useState<Pet[]>([])
-    const [loading, setLoading] = useState(true)
+
     const [showModal, setShowModal] = useState(false)
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
     // Form state
     const [petId, setPetId] = useState('')
@@ -41,12 +40,7 @@ export default function CalendarPage() {
     const [startTime, setStartTime] = useState('')
     const [description, setDescription] = useState('')
 
-    useEffect(() => {
-        fetchData()
-    }, [])
-
-    const fetchData = async () => {
-        setLoading(true)
+    const fetchData = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
@@ -59,8 +53,15 @@ export default function CalendarPage() {
             .order('start_time', { ascending: true })
         
         setEvents(eventsData || [])
-        setLoading(false)
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+                fetchData()
+            }
+        })
+    }, [supabase, fetchData])
 
     const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
     const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
@@ -109,7 +110,7 @@ export default function CalendarPage() {
             days.push(
                 <div 
                     key={d} 
-                    onClick={() => { setSelectedDate(new Date(year, month, d)); setShowModal(true); setStartTime(`${dateStr}T09:00`) }}
+                    onClick={() => { setShowModal(true); setStartTime(`${dateStr}T09:00`) }}
                     style={{
                         minHeight: 110, padding: 12, borderRadius: 16, background: isToday ? 'rgba(108,63,245,0.08)' : 'rgba(255,255,255,0.02)',
                         border: `1px solid ${isToday ? 'rgba(108,63,245,0.3)' : 'rgba(255,255,255,0.05)'}`, cursor: 'pointer', transition: 'all 0.2s', position: 'relative'
@@ -156,11 +157,7 @@ export default function CalendarPage() {
         fetchData()
     }
 
-    const deleteEvent = async (id: string) => {
-        if (!confirm('¿Eliminar evento?')) return
-        await supabase.from('care_calendar_events').delete().eq('id', id)
-        fetchData()
-    }
+
 
     const [saving, setSaving] = useState(false)
 

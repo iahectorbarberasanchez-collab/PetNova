@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -59,40 +59,30 @@ export default function MatchPage() {
     const [swipeAnim, setSwipeAnim] = useState<'like' | 'pass' | null>(null)
     const [showMatch, setShowMatch] = useState<Pet | null>(null)
 
-    useEffect(() => {
-        initData()
-    }, [])
+    const loadMatches = useCallback(async (petId: string) => {
+        const { data } = await supabase
+            .from('pet_matches')
+            .select('id, matched_at, pet_a_id, pet_b_id')
+            .or(`pet_a_id.eq.${petId},pet_b_id.eq.${petId}`)
 
-    const initData = async () => {
-        setLoading(true)
-        try {
-            const { data: userData } = await supabase.auth.getUser()
-            if (!userData.user) return
+        if (!data) return
 
-            // Get all user's pets
-            const { data: userPets } = await supabase
+        const matchList: Match[] = []
+        for (const m of data) {
+            const otherId = m.pet_a_id === petId ? m.pet_b_id : m.pet_a_id
+            const { data: otherPet } = await supabase
                 .from('pets')
-                .select('id, name, species, breed, birth_date, avatar_url, wants_to_breed, profiles:owner_id(display_name), pet_photos(id)')
-                .eq('owner_id', userData.user.id)
-
-            if (!userPets || userPets.length === 0) {
-                setLoading(false)
-                return
+                .select('id, name, species, breed, birth_date, avatar_url, profiles:owner_id(display_name)')
+                .eq('id', otherId)
+                .single()
+            if (otherPet) {
+                matchList.push({ id: m.id, matched_at: m.matched_at, other_pet: otherPet as unknown as Pet })
             }
-
-            setAllMyPets(userPets as any)
-            const firstPet = userPets[0] as any
-            setMyPet(firstPet)
-
-            await loadPetData(firstPet.id, userData.user.id)
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
         }
-    }
+        setMatches(matchList)
+    }, [supabase])
 
-    const loadPetData = async (petId: string, userId: string) => {
+    const loadPetData = useCallback(async (petId: string, userId: string) => {
         setLoadingCandidates(true)
         try {
             setCurrentIndex(0)
@@ -128,7 +118,40 @@ export default function MatchPage() {
         } finally {
             setLoadingCandidates(false)
         }
-    }
+    }, [loadMatches, supabase])
+
+    const initData = useCallback(async () => {
+        setLoading(true)
+        try {
+            const { data: userData } = await supabase.auth.getUser()
+            if (!userData.user) return
+
+            // Get all user's pets
+            const { data: userPets } = await supabase
+                .from('pets')
+                .select('id, name, species, breed, birth_date, avatar_url, wants_to_breed, profiles:owner_id(display_name), pet_photos(id)')
+                .eq('owner_id', userData.user.id)
+
+            if (!userPets || userPets.length === 0) {
+                setLoading(false)
+                return
+            }
+
+            setAllMyPets(userPets as unknown as Pet[])
+            const firstPet = userPets[0] as unknown as Pet
+            setMyPet(firstPet)
+
+            await loadPetData(firstPet.id, userData.user.id)
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
+    }, [loadPetData, supabase])
+
+    useEffect(() => {
+        initData()
+    }, [initData])
 
     const handlePetChange = async (pet: Pet) => {
         setMyPet(pet)
@@ -136,29 +159,6 @@ export default function MatchPage() {
         if (userData.user) {
             await loadPetData(pet.id, userData.user.id)
         }
-    }
-
-    const loadMatches = async (petId: string) => {
-        const { data } = await supabase
-            .from('pet_matches')
-            .select('id, matched_at, pet_a_id, pet_b_id')
-            .or(`pet_a_id.eq.${petId},pet_b_id.eq.${petId}`)
-
-        if (!data) return
-
-        const matchList: Match[] = []
-        for (const m of data) {
-            const otherId = m.pet_a_id === petId ? m.pet_b_id : m.pet_a_id
-            const { data: otherPet } = await supabase
-                .from('pets')
-                .select('id, name, species, breed, birth_date, avatar_url, profiles:owner_id(display_name)')
-                .eq('id', otherId)
-                .single()
-            if (otherPet) {
-                matchList.push({ id: m.id, matched_at: m.matched_at, other_pet: otherPet as any })
-            }
-        }
-        setMatches(matchList)
     }
 
     const handleSwipe = async (action: 'like' | 'pass') => {
@@ -318,7 +318,7 @@ export default function MatchPage() {
                                         <div className="text-6xl mb-2">📸</div>
                                         <h3 className="text-xl font-bold text-red-400">Requisitos no cumplidos</h3>
                                         <p className="text-white/60 text-sm mb-6 max-w-sm mx-auto">
-                                            Para usar el Match (Montas), <b>{myPet.name}</b> debe tener activada la opción "Disponible para Match" y contar con al menos 3 fotos en su perfil.
+                                            Para usar el Match (Montas), <b>{myPet.name}</b> debe tener activada la opción &ldquo;Disponible para Match&rdquo; y contar con al menos 3 fotos en su perfil.
                                         </p>
                                         <Link href={`/dashboard/pets/${myPet.id}`}>
                                             <PremiumButton variant="primary">Completar Perfil</PremiumButton>
@@ -399,7 +399,7 @@ export default function MatchPage() {
                                                 </div>
                                                 <p className="text-white/40 text-sm flex items-center gap-2">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                                    Dueño: {(currentPet.profiles as any)?.display_name || 'Usuario'}
+                                                    Dueño: {currentPet.profiles?.display_name || 'Usuario'}
                                                 </p>
 
                                                 {/* Progress Line */}
@@ -494,7 +494,7 @@ export default function MatchPage() {
                                                     </span>
                                                 </div>
                                                 <div className="text-xs text-white/50 truncate mt-1">
-                                                    De {(m.other_pet.profiles as any)?.display_name}
+                                                    De {m.other_pet.profiles?.display_name}
                                                 </div>
                                             </div>
                                             <Link href={`/dashboard/match/chat/${m.id}`} className="relative z-10 shrink-0">
@@ -540,7 +540,7 @@ export default function MatchPage() {
                                 💞
                             </motion.div>
                             <h2 className="text-4xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4 tracking-tight drop-shadow-sm">
-                                ¡It's a Match!
+                                ¡It&apos;s a Match!
                             </h2>
                             <p className="text-white/90 text-lg mb-4">
                                 <strong className="text-white">{myPet.name}</strong> y <strong className="text-white">{showMatch.name}</strong> se han gustado 🐾

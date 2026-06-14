@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Sidebar from '@/components/Sidebar'
-import { Heart, Calendar, Plus, Trash2, Info, Star, ShieldAlert } from 'lucide-react'
+import Sidebar from '@/components/layout/Sidebar'
+import { Heart, Calendar, Trash2, Star, ShieldAlert } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // --- Types ---
@@ -27,7 +27,7 @@ export default function BreedingPage() {
     const [pets, setPets] = useState<Pet[]>([])
     const [selectedPetId, setSelectedPetId] = useState<string>('')
     const [breedingLogs, setBreedingLogs] = useState<BreedingLog[]>([])
-    const [loading, setLoading] = useState(true)
+
     const [showModal, setShowModal] = useState(false)
 
     // Form inputs
@@ -35,15 +35,7 @@ export default function BreedingPage() {
     const [status, setStatus] = useState('Heat')
     const [notes, setNotes] = useState('')
 
-    useEffect(() => {
-        fetchInitial()
-    }, [])
-
-    useEffect(() => {
-        if (selectedPetId) fetchBreedingLogs(selectedPetId)
-    }, [selectedPetId])
-
-    const fetchInitial = async () => {
+    const fetchInitial = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         const { data: petsData } = await supabase.from('pets').select('id, name, species, wants_to_breed').eq('owner_id', user.id)
@@ -51,16 +43,31 @@ export default function BreedingPage() {
             setPets(petsData)
             setSelectedPetId(petsData[0].id)
         }
-        setLoading(false)
-    }
+    }, [supabase])
 
-    const fetchBreedingLogs = async (petId: string) => {
+    const fetchBreedingLogs = useCallback(async (petId: string) => {
         const { data } = await supabase.from('pet_breeding_logs')
             .select('*')
             .eq('pet_id', petId)
             .order('cycle_start', { ascending: false })
         setBreedingLogs(data || [])
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchInitial()
+        }, 0)
+        return () => clearTimeout(timer)
+    }, [fetchInitial])
+
+    useEffect(() => {
+        if (selectedPetId) {
+            const timer = setTimeout(() => {
+                fetchBreedingLogs(selectedPetId)
+            }, 0)
+            return () => clearTimeout(timer)
+        }
+    }, [selectedPetId, fetchBreedingLogs])
 
     const toggleWantsToBreed = async (id: string, current: boolean) => {
         const { error } = await supabase.from('pets').update({ wants_to_breed: !current }).eq('id', id)

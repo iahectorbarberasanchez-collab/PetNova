@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import Sidebar from '@/components/Sidebar'
-import { ShieldAlert, Activity, Heart, Info, Phone, MessageCircle, AlertTriangle, ChevronRight, X } from 'lucide-react'
+import Sidebar from '@/components/layout/Sidebar'
+import { ShieldAlert, Activity, Heart, Phone, AlertTriangle, ChevronRight, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Link from 'next/link'
+
 
 const GUIDES = [
   {
@@ -69,25 +69,26 @@ export default function FirstAidPage() {
             <Sidebar />
             <main className="dashboard-main" style={{ overflowY: 'auto' }}>
                 <div className="noise-overlay" />
-                <div style={{ padding: 48, maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+                <div className="px-4 py-8 sm:p-12" style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 1 }}>
                     
                     <div style={{ marginBottom: 60, textAlign: 'center' }}>
                         <div style={{ display: 'inline-flex', padding: '8px 24px', borderRadius: 100, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: '0.8rem', fontWeight: 900, marginBottom: 20 }}>
                             PROTOCOLO DE EMERGENCIA 🆘
                         </div>
-                        <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '3.5rem', fontWeight: 900, marginBottom: 20 }}>Primeros Auxilios</h1>
+                        <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'clamp(2rem, 8vw, 3.5rem)', fontWeight: 900, marginBottom: 20 }}>Primeros Auxilios</h1>
                         <p style={{ maxWidth: 600, margin: '0 auto', opacity: 0.5, lineHeight: 1.6 }}>Guías rápidas para actuar en los primeros minutos críticos. Mantén siempre el contacto de tu veterinario a mano.</p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 40 }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                         {GUIDES.map(guide => (
                             <div 
                                 key={guide.id} 
                                 onClick={() => setSelectedGuide(guide)}
-                                style={{ background: 'rgba(13,13,25,0.6)', borderRadius: 28, border: '1px solid rgba(255,255,255,0.05)', padding: 32, cursor: 'pointer', transition: 'all 0.3s' }}
+                                className="p-6 sm:p-8"
+                                style={{ background: 'rgba(13,13,25,0.6)', borderRadius: 28, border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'all 0.3s' }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-                                    <div style={{ width: 48, height: 48, borderRadius: 16, background: `${guide.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: guide.color }}><guide.icon size={24} /></div>
+                                    <div style={{ width: 48, height: 48, borderRadius: 16, background: `${guide.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: guide.color, flexShrink: 0 }}><guide.icon size={24} /></div>
                                     <div>
                                         <h3 style={{ margin: 0, fontWeight: 800 }}>{guide.title}</h3>
                                         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: guide.color }}>URGENCIA: {guide.urgency}</div>
@@ -98,13 +99,13 @@ export default function FirstAidPage() {
                         ))}
                     </div>
 
-                    <div style={{ background: 'linear-gradient(135deg, #121220, #07070F)', borderRadius: 32, border: '1px solid rgba(255,255,255,0.05)', padding: 40, display: 'flex', alignItems: 'center', gap: 32 }}>
-                        <div style={{ width: 80, height: 80, borderRadius: 24, background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}><Phone size={40} /></div>
-                        <div style={{ flex: 1 }}>
+                    <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 p-6 sm:p-10" style={{ background: 'linear-gradient(135deg, #121220, #07070F)', borderRadius: 32, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ width: 80, height: 80, borderRadius: 24, background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0 }}><Phone size={40} /></div>
+                        <div className="text-center md:text-left" style={{ flex: 1 }}>
                             <h3 style={{ margin: '0 0 8px', fontWeight: 800 }}>¿Necesitas Ayuda Profesional?</h3>
                             <p style={{ margin: 0, opacity: 0.4, fontSize: '0.9rem' }}>Contacta con el hospital de emergencias más cercano o usa nuestra videollamada SOS.</p>
                         </div>
-                        <button style={{ padding: '16px 32px', borderRadius: 16, background: '#10B981', border: 'none', color: 'white', fontWeight: 900, cursor: 'pointer' }}>LLAMAR VETERINARIO</button>
+                        <button className="w-full md:w-auto" style={{ padding: '16px 32px', borderRadius: 16, background: '#10B981', border: 'none', color: 'white', fontWeight: 900, cursor: 'pointer' }}>LLAMAR VETERINARIO</button>
                     </div>
                 </div>
 
@@ -112,12 +113,12 @@ export default function FirstAidPage() {
                 <AnimatePresence>
                     {selectedGuide && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(20px)' }}>
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} style={{ width: 500, background: '#0D0D1A', borderRadius: 40, border: `2px solid ${selectedGuide.color}30`, padding: 50, position: 'relative' }}>
-                                <button onClick={() => setSelectedGuide(null)} style={{ position: 'absolute', top: 30, right: 30, background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', width: 40, height: 40, borderRadius: 20, cursor: 'pointer' }}><X size={20} /></button>
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="w-[90%] max-w-[500px] p-6 sm:p-12 max-h-[90vh] overflow-y-auto" style={{ background: '#0D0D1A', borderRadius: 40, border: `2px solid ${selectedGuide.color}30`, position: 'relative' }}>
+                                <button onClick={() => setSelectedGuide(null)} className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', width: 44, height: 44, borderRadius: 22, cursor: 'pointer' }}><X size={20} /></button>
                                 
                                 <div style={{ textAlign: 'center', marginBottom: 40 }}>
-                                    <div style={{ width: 80, height: 80, borderRadius: 24, background: `${selectedGuide.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: selectedGuide.color, margin: '0 auto 20px' }}><selectedGuide.icon size={40} /></div>
-                                    <h2 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>{selectedEntry?.title}</h2>
+                                    <div style={{ width: 80, height: 80, borderRadius: 24, background: `${selectedGuide.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: selectedGuide.color, margin: '0 auto 20px', flexShrink: 0 }}><selectedGuide.icon size={40} /></div>
+                                    <h2 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>{selectedGuide?.title}</h2>
                                     <div style={{ fontSize: '0.8rem', fontWeight: 900, color: selectedGuide.color, marginTop: 8 }}>MANTÉN LA CALMA. SIGUE LOS PASOS:</div>
                                 </div>
 

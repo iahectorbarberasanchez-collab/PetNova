@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { useUser } from '@/hooks/useUser'
 import { usePets } from '@/hooks/usePets'
@@ -98,7 +98,7 @@ export default function SocialPage() {
                         <LayoutGroup>
                             <div className="flex flex-col gap-6">
                                 <AnimatePresence initial={false}>
-                                    {posts.map((post, index) => (
+                                    {posts.map((post) => (
                                         <PostCard
                                             key={post.id}
                                             post={post}

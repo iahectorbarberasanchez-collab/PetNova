@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -51,18 +51,7 @@ export default function ChatPage() {
     const bottomRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
-    useEffect(() => {
-        if (matchId) {
-            init()
-        }
-    }, [matchId])
-
-    // Scroll to bottom whenever messages change
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [messages])
-
-    const init = async () => {
+    const init = useCallback(async () => {
         setLoading(true)
         const { data: auth } = await supabase.auth.getUser()
         if (!auth.user) return
@@ -79,7 +68,7 @@ export default function ChatPage() {
             .eq('id', matchId)
             .single()
 
-        setMatchInfo(match as any)
+        setMatchInfo(match as unknown as MatchInfo)
 
         // Load existing messages
         const { data: msgs } = await supabase
@@ -88,8 +77,16 @@ export default function ChatPage() {
             .eq('match_id', matchId)
             .order('created_at', { ascending: true })
 
-        setMessages((msgs as any) || [])
+        setMessages((msgs as unknown as Message[]) || [])
         setLoading(false)
+    }, [matchId, supabase])
+
+    useEffect(() => {
+        if (!matchId) return
+
+        const timer = setTimeout(() => {
+            init()
+        }, 0)
 
         // Subscribe to realtime messages
         const channel = supabase
@@ -114,7 +111,7 @@ export default function ChatPage() {
                         setMessages(prev => {
                             // Avoid duplicate if we already added optimistically
                             if (prev.some(m => m.id === newMsg.id)) return prev
-                            return [...prev, newMsg as any]
+                            return [...prev, newMsg as unknown as Message]
                         })
                     }
                 }
@@ -122,9 +119,15 @@ export default function ChatPage() {
             .subscribe()
 
         return () => {
+            clearTimeout(timer)
             supabase.removeChannel(channel)
         }
-    }
+    }, [matchId, init, supabase])
+
+    // Scroll to bottom whenever messages change
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
 
     const sendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -148,12 +151,7 @@ export default function ChatPage() {
         inputRef.current?.focus()
     }
 
-    // Determine the other pet info for the header
-    const otherPet = matchInfo
-        ? (matchInfo.pet_a.profiles as any)?.display_name === myUserId
-            ? matchInfo.pet_b
-            : matchInfo.pet_b
-        : null
+
 
     // Group messages by date for separators
     const groupedMessages = messages.reduce<{ date: string; msgs: Message[] }[]>((groups, msg) => {
@@ -174,8 +172,8 @@ export default function ChatPage() {
         </div>
     )
 
-    const pet_a = matchInfo?.pet_a as any
-    const pet_b = matchInfo?.pet_b as any
+    const pet_a = matchInfo?.pet_a
+    const pet_b = matchInfo?.pet_b
 
     return (
         <div className="flex flex-col h-screen bg-dark-bg text-white font-sans max-w-2xl mx-auto border-x border-white/5 shadow-2xl relative">
@@ -195,7 +193,7 @@ export default function ChatPage() {
                             `}
                             style={pet?.avatar_url ? { background: `url(${pet.avatar_url}) center/cover` } : {}}
                         >
-                            {!pet?.avatar_url && (SPECIES_EMOJI[pet?.species] || '🐾')}
+                            {!pet?.avatar_url && (SPECIES_EMOJI[pet?.species ?? ''] || '🐾')}
                         </div>
                     ))}
                 </div>
@@ -237,7 +235,7 @@ export default function ChatPage() {
 
                         {group.msgs.map((msg, i) => {
                             const isMe = msg.sender_id === myUserId
-                            const profile = msg.profiles as any
+                            const profile = msg.profiles
                             const prevMsg = group.msgs[i - 1]
                             const showAvatar = !isMe && (!prevMsg || prevMsg.sender_id !== msg.sender_id)
 

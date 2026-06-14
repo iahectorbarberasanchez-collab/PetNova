@@ -55,7 +55,7 @@ export interface PetSpeciesProfile {
   id: string;
   pet_id: string;
   species_category: string;
-  specific_data: Record<string, any>;
+  specific_data: Record<string, unknown>;
   habitat_notes: string | null;
   dietary_requirements: string | null;
   created_at: string;

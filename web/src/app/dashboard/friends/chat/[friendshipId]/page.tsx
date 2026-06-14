@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
@@ -46,15 +46,7 @@ export default function FriendChatPage() {
     const bottomRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
-    useEffect(() => {
-        if (friendshipId) init()
-    }, [friendshipId])
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [messages])
-
-    const init = async () => {
+    const init = useCallback(async () => {
         setLoading(true)
         const { data: auth } = await supabase.auth.getUser()
         if (!auth.user) return
@@ -82,6 +74,14 @@ export default function FriendChatPage() {
 
         setMessages((msgs as unknown as Message[]) || [])
         setLoading(false)
+    }, [friendshipId])
+
+    useEffect(() => {
+        if (!friendshipId) return
+
+        const timer = setTimeout(() => {
+            init()
+        }, 0)
 
         // Realtime subscription
         const channel = supabase
@@ -107,8 +107,15 @@ export default function FriendChatPage() {
             })
             .subscribe()
 
-        return () => { supabase.removeChannel(channel) }
-    }
+        return () => {
+            clearTimeout(timer)
+            supabase.removeChannel(channel)
+        }
+    }, [friendshipId, init])
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
 
     const sendMessage = async (e: React.FormEvent) => {
         e.preventDefault()

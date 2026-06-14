@@ -1,40 +1,41 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import DashboardLayout from '@/components/DashboardLayout'
+import { useState } from 'react'
+import DashboardLayout from '@/components/layout/DashboardLayout'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
 import { Activity, Smile, Scale, LucideIcon, Gift, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useWellness } from '@/features/wellness/hooks/useWellness'
+import { WeightChart } from '@/features/wellness/components/WeightChart'
+import { BehaviorList } from '@/features/wellness/components/BehaviorList'
+import { MOODS } from '@/core/entities/pet'
 
-// --- Types ---
-interface WeightEntry {
-    id: string; pet_id: string; weight_kg: number; recorded_at: string
-}
-interface BehaviorEntry {
-    id: string; pet_id: string; mood: string; energy_level: number; notes: string | null; recorded_at: string
-}
-interface Pet {
-    id: string; name: string; species: string
-}
-
-const MOODS = [
-  { emoji: '🤩', label: 'Eufórico', value: 'Excellent' },
-  { emoji: '😊', label: 'Feliz', value: 'Good' },
-  { emoji: '😐', label: 'Normal', value: 'Neutral' },
-  { emoji: '😔', label: 'Triste', value: 'Sad' },
-  { emoji: '🤒', label: 'Enfermito', value: 'Sick' },
-]
+const SectionHeader = ({ title, icon: Icon, action }: { title: string, icon: LucideIcon, action?: React.ReactNode }) => (
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary-light)] shadow-inner">
+                <Icon size={24} />
+            </div>
+            <h3 className="text-xl font-black tracking-tight">{title}</h3>
+        </div>
+        {action}
+    </div>
+)
 
 export default function WellnessPage() {
-    const supabase = createClient()
-    const [pets, setPets] = useState<Pet[]>([])
-    const [selectedPetId, setSelectedPetId] = useState<string>('')
-    const [weightHistory, setWeightHistory] = useState<WeightEntry[]>([])
-    const [behaviorHistory, setBehaviorHistory] = useState<BehaviorEntry[]>([])
-    const [loading, setLoading] = useState(true)
+    const {
+        pets,
+        selectedPetId,
+        setSelectedPetId,
+        weightHistory,
+        behaviorHistory,
+        loading,
+        addWeight,
+        addBehavior
+    } = useWellness()
+
     const [showWeightModal, setShowWeightModal] = useState(false)
     const [showBehaviorModal, setShowBehaviorModal] = useState(false)
 
@@ -44,110 +45,25 @@ export default function WellnessPage() {
     const [newEnergy, setNewEnergy] = useState(5)
     const [newNotes, setNewNotes] = useState('')
 
-    useEffect(() => {
-        fetchInitial()
-    }, [])
-
-    useEffect(() => {
-        if (selectedPetId) fetchPetData(selectedPetId)
-    }, [selectedPetId])
-
-    const fetchInitial = async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-        const { data: petsData } = await supabase.from('pets').select('id, name, species').eq('owner_id', user.id)
-        if (petsData && petsData.length > 0) {
-            setPets(petsData)
-            setSelectedPetId(petsData[0].id)
-        }
-        setLoading(false)
-    }
-
-    const fetchPetData = async (petId: string) => {
-        const { data: weight } = await supabase.from('pet_weight_history').select('*').eq('pet_id', petId).order('recorded_at', { ascending: false })
-        const { data: behavior } = await supabase.from('pet_behavior_logs').select('*').eq('pet_id', petId).order('recorded_at', { ascending: false })
-        setWeightHistory(weight || [])
-        setBehaviorHistory(behavior || [])
-    }
-
     const handleAddWeight = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!selectedPetId || !newWeight) return
-        const { error } = await supabase.from('pet_weight_history').insert({
-            pet_id: selectedPetId, weight_kg: parseFloat(newWeight)
-        })
-        if (!error) { fetchPetData(selectedPetId); setShowWeightModal(false); setNewWeight('') }
+        const { error } = await addWeight(parseFloat(newWeight))
+        if (!error) { setShowWeightModal(false); setNewWeight('') }
     }
 
     const handleAddBehavior = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!selectedPetId) return
-        const { error } = await supabase.from('pet_behavior_logs').insert({
-            pet_id: selectedPetId, mood: newMood, energy_level: newEnergy, notes: newNotes || null
-        })
-        if (!error) { fetchPetData(selectedPetId); setShowBehaviorModal(false); setNewNotes(''); setNewEnergy(5) }
+        const { error } = await addBehavior(newMood, newEnergy, newNotes)
+        if (!error) { setShowBehaviorModal(false); setNewNotes(''); setNewEnergy(5) }
     }
 
-    // Chart Helper (Simple Line Chart with SVG)
-    const renderWeightChart = () => {
-        if (weightHistory.length < 2) return <div className="h-[200px] flex items-center justify-center text-[var(--text-dim)] text-sm">Añade al menos 2 registros para ver la tendencia.</div>
-        
-        const data = [...weightHistory].reverse()
-        const maxWeight = Math.max(...data.map(d => d.weight_kg)) * 1.1
-        const minWeight = Math.min(...data.map(d => d.weight_kg)) * 0.9
-        const range = maxWeight - minWeight
-        const width = 800; const height = 200
-        const points = data.map((d, i) => ({
-            x: (i / (data.length - 1)) * width,
-            y: height - ((d.weight_kg - minWeight) / range) * height
-        }))
 
-        const pathD = points.reduce((acc, p, i) => i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`, '')
 
-        return (
-            <div className="py-6">
-                <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[200px] overflow-visible">
-                    <defs>
-                        <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="var(--primary)" />
-                            <stop offset="100%" stopColor="var(--secondary)" />
-                        </linearGradient>
-                    </defs>
-                    <motion.path 
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
-                        d={pathD} fill="none" stroke="url(#lineGrad)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" 
-                    />
-                    {points.map((p, i) => (
-                        <circle key={i} cx={p.x} cy={p.y} r="6" className="fill-[var(--background)] stroke-[var(--primary-light)] stroke-[2px]" />
-                    ))}
-                </svg>
-                <div className="flex justify-between mt-4 opacity-30 text-[10px] font-bold uppercase tracking-wider">
-                    <span>{new Date(data[0].recorded_at).toLocaleDateString()}</span>
-                    <span className="text-[var(--primary)]">Evolución de Masa Corporal</span>
-                    <span>{new Date(data[data.length-1].recorded_at).toLocaleDateString()}</span>
-                </div>
-            </div>
-        )
-    }
-
-    const SectionHeader = ({ title, icon: Icon, action }: { title: string, icon: LucideIcon, action?: React.ReactNode }) => (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary-light)] shadow-inner">
-                    <Icon size={24} />
-                </div>
-                <h3 className="text-xl font-black tracking-tight">{title}</h3>
-            </div>
-            {action}
-        </div>
-    )
+    if (loading) return <div className="flex items-center justify-center h-screen font-black text-2xl tracking-widest opacity-20 animate-pulse">CARGANDO...</div>
 
     return (
         <DashboardLayout>
             <div className="max-w-6xl mx-auto">
-                {/* --- Header Section --- */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                     <div>
                         <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-2 bg-gradient-to-br from-white via-white to-[var(--primary)] bg-clip-text text-transparent">
@@ -165,12 +81,7 @@ export default function WellnessPage() {
                 </div>
 
                 <div className="space-y-12">
-                    {/* --- Invitation Banner --- */}
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }}
-                        className="relative group"
-                    >
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative group">
                         <Link href="/dashboard/referral">
                             <GlassCard className="p-6 md:p-8 overflow-hidden border-none relative" hover={true}>
                                 <div className="absolute inset-0 bg-gradient-to-r from-[#6C3FF5]/20 via-transparent to-[#00D4FF]/10 opacity-50 group-hover:opacity-80 transition-opacity" />
@@ -191,14 +102,14 @@ export default function WellnessPage() {
                             </GlassCard>
                         </Link>
                     </motion.div>
-                    {/* --- Weight Section --- */}
+
                     <GlassCard className="p-8 md:p-10" hover={false}>
                         <SectionHeader 
                             title="Historial de Peso" 
                             icon={Scale} 
                             action={<PremiumButton onClick={() => setShowWeightModal(true)} variant="primary">+ REGISTRO</PremiumButton>}
                         />
-                        {renderWeightChart()}
+                        <WeightChart weightHistory={weightHistory} />
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                             {weightHistory.slice(0, 4).map((w, i) => (
                                 <motion.div 
@@ -215,7 +126,6 @@ export default function WellnessPage() {
                         </div>
                     </GlassCard>
 
-                    {/* --- Behavior & Tips --- */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <GlassCard className="lg:col-span-2 p-8 md:p-10" hover={false}>
                             <SectionHeader 
@@ -223,35 +133,7 @@ export default function WellnessPage() {
                                 icon={Smile} 
                                 action={<PremiumButton onClick={() => setShowBehaviorModal(true)} variant="ghost">NUEVO LOG</PremiumButton>}
                             />
-                            <div className="space-y-4">
-                                {behaviorHistory.slice(0, 5).map((log, i) => {
-                                    const moodObj = MOODS.find(m => m.value === log.mood)
-                                    return (
-                                        <motion.div 
-                                            key={log.id} 
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.1 }}
-                                            className="flex items-center gap-6 p-5 rounded-3xl bg-white/[0.02] border border-white/[0.03] hover:bg-white/[0.04] transition-colors group"
-                                        >
-                                            <div className="text-4xl drop-shadow-lg group-hover:scale-110 transition-transform">{moodObj?.emoji || '🐾'}</div>
-                                            <div className="flex-1">
-                                                <div className="flex justify-between items-center mb-3">
-                                                    <span className="font-black text-lg tracking-tight">{moodObj?.label}</span>
-                                                    <span className="text-[10px] font-bold opacity-30 uppercase tracking-widest">{new Date(log.recorded_at).toLocaleDateString()}</span>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                    {[...Array(10)].map((_, i) => (
-                                                        <div key={i} className={`h-1.5 flex-1 rounded-full ${i < log.energy_level ? 'bg-[var(--primary)]' : 'bg-white/5 blur-[0.5px]'}`} />
-                                                    ))}
-                                                </div>
-                                                {log.notes && <p className="mt-4 text-sm text-[var(--text-dim)] font-medium leading-relaxed italic">"{log.notes}"</p>}
-                                            </div>
-                                        </motion.div>
-                                    )
-                                })}
-                                {behaviorHistory.length === 0 && <p className="text-center py-10 text-[var(--text-dim)] font-bold italic opacity-40">Sin registros de comportamiento.</p>}
-                            </div>
+                            <BehaviorList behaviorHistory={behaviorHistory} />
                         </GlassCard>
 
                         <GlassCard className="p-8 md:p-10 flex flex-col justify-between" hover={false} delay={0.2}>
@@ -260,7 +142,7 @@ export default function WellnessPage() {
                                 <div className="bg-[var(--primary)]/5 rounded-[2rem] p-8 border border-[var(--primary)]/10 shadow-inner relative overflow-hidden group">
                                     <div className="absolute -right-8 -top-8 w-24 h-24 bg-[var(--primary)]/10 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000" />
                                     <p className="text-[var(--primary-light)] font-bold leading-relaxed relative z-10 text-lg">
-                                        "Basado en los datos de esta semana, el nivel de energía ha bajado un 20%. Considera una revisión de salud si persiste."
+                                        &ldquo;Basado en los datos de esta semana, el nivel de energía ha bajado un 20%. Considera una revisión de salud si persiste.&rdquo;
                                     </p>
                                 </div>
                             </div>
@@ -275,7 +157,6 @@ export default function WellnessPage() {
                 </div>
             </div>
 
-            {/* MODALS */}
             <AnimatePresence>
                 {showWeightModal && (
                     <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">

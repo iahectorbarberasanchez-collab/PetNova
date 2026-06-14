@@ -16,7 +16,7 @@ const SPECIES_MAP: Record<string, string> = {
     'reptil': 'Reptile', 'lagarto': 'Reptile', 'reptile': 'Reptile',
 }
 
-function mapSpecies(raw: string): string {
+export function mapSpecies(raw: string): string {
     const normalized = raw.toLowerCase().trim()
     for (const [key, val] of Object.entries(SPECIES_MAP)) {
         if (normalized.includes(key)) return val

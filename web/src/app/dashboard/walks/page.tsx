@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -8,20 +8,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
     MapPin, 
     Calendar, 
-    Clock, 
-    TrendingUp, 
     Trash2, 
     ChevronRight,
-    Search,
-    Filter,
     Plus,
     Navigation,
     Timer,
     Zap,
     Loader2
 } from 'lucide-react'
-import DashboardLayout from '@/components/DashboardLayout'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -74,15 +70,7 @@ export default function WalksPage() {
     const [walks, setWalks] = useState<Walk[]>([])
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        supabase.auth.getUser().then(async ({ data: { user } }) => {
-            if (!user) { router.push('/auth'); return }
-            setUserId(user.id)
-            await loadWalks()
-        })
-    }, [])
-
-    const loadWalks = async () => {
+    const loadWalks = useCallback(async () => {
         setLoading(true)
         const { data, error } = await supabase
             .from('walks')
@@ -94,7 +82,15 @@ export default function WalksPage() {
             setWalks(data)
         }
         setLoading(false)
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        supabase.auth.getUser().then(async ({ data: { user } }) => {
+            if (!user) { router.push('/auth'); return }
+            setUserId(user.id)
+            await loadWalks()
+        })
+    }, [loadWalks, router, supabase])
 
     const handleDeleteWalk = async (walk: Walk) => {
         if (!confirm('¿Eliminar este paseo?')) return
@@ -199,7 +195,7 @@ export default function WalksPage() {
                                                 {walk.user_id === userId && (
                                                     <button 
                                                         onClick={() => handleDeleteWalk(walk)}
-                                                        className="p-2 rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/40 hover:bg-red-500/20 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                                        className="w-11 h-11 flex items-center justify-center rounded-xl bg-red-500/5 border border-red-500/10 text-red-500/40 hover:bg-red-500/20 hover:text-red-500 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>

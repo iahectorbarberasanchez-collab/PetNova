@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -40,15 +40,7 @@ export default function PetBotPage() {
     const inputRef = useRef<HTMLInputElement>(null)
     const [activeTab, setActiveTab] = useState<'chat' | 'breed'>('chat')
 
-    useEffect(() => {
-        loadUserPet()
-    }, [])
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [messages, loading])
-
-    const loadUserPet = async () => {
+    const loadUserPet = useCallback(async () => {
         const { data: auth } = await supabase.auth.getUser()
         if (!auth.user) return
         const { data: pet } = await supabase
@@ -59,7 +51,15 @@ export default function PetBotPage() {
             .single()
 
         if (pet) setPetContext(pet as PetContext)
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        loadUserPet()
+    }, [loadUserPet])
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages, loading])
 
     const sendMessage = async (text?: string) => {
         const query = (text || input).trim()
@@ -263,11 +263,19 @@ export default function PetBotPage() {
     )
 }
 
+interface BreedDetectionResult {
+    species: string
+    breed: string
+    confidence?: string
+    characteristics?: string[]
+    tips?: string
+}
+
 // ─── BREED DETECTOR COMPONENT ────────────────────────────────────────────────
 function BreedDetector() {
     const [image, setImage] = useState<string | null>(null)
     const [mimeType, setMimeType] = useState('image/jpeg')
-    const [result, setResult] = useState<any>(null)
+    const [result, setResult] = useState<BreedDetectionResult | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -407,7 +415,7 @@ function BreedDetector() {
                                 )}
                             </div>
 
-                            {result.characteristics?.length > 0 && (
+                            {result.characteristics && result.characteristics.length > 0 && (
                                 <div className="mb-6">
                                     <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">Rasgos Detectados</p>
                                     <div className="flex flex-wrap gap-2">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -23,7 +23,7 @@ export function ProactiveTip({ pet }: ProactiveTipProps) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
 
-    const fetchTip = async () => {
+    const fetchTip = useCallback(async () => {
         setLoading(true)
         setError(false)
         try {
@@ -47,13 +47,13 @@ export function ProactiveTip({ pet }: ProactiveTipProps) {
         } finally {
             setLoading(false)
         }
-    }
+    }, [pet])
 
     useEffect(() => {
         if (pet) {
             fetchTip()
         }
-    }, [pet.id])
+    }, [pet, fetchTip])
 
     return (
         <motion.div
@@ -115,7 +115,7 @@ export function ProactiveTip({ pet }: ProactiveTipProps) {
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="text-[#F8F8FF99] text-sm max-w-2xl leading-relaxed italic"
                                 >
-                                    "{tip}"
+                                    &ldquo;{tip}&rdquo;
                                 </motion.div>
                             ) : null}
                         </AnimatePresence>

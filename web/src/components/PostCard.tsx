@@ -99,7 +99,7 @@ export function PostCard({ post, userId, onLike, onDelete, onFetchComments, onAd
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,100,100,0.1)', color: '#FF7070' }}
             whileTap={{ scale: 0.9 }}
             onClick={() => onDelete(post.id)}
-            className="w-9 h-9 flex items-center justify-center bg-transparent border-none cursor-pointer text-[0.95rem] text-white/10 rounded-xl transition-all"
+            className="w-11 h-11 flex items-center justify-center bg-transparent border-none cursor-pointer text-[0.95rem] text-white/10 rounded-xl transition-all"
           >
             🗑️
           </motion.button>
@@ -124,17 +124,17 @@ export function PostCard({ post, userId, onLike, onDelete, onFetchComments, onAd
       )}
 
       {/* Actions */}
-      <div className="px-6 pb-5 flex gap-6 items-center">
+      <div className="px-5 pb-5 flex gap-6 items-center">
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => onLike(post)}
-          className={`bg-transparent border-none flex items-center gap-2 text-[0.95rem] font-bold transition-all cursor-pointer p-0 ${post.liked_by_me ? 'text-[#6C3FF5]' : 'text-white/30 hover:text-white/50'}`}
+          className={`bg-transparent border-none inline-flex items-center gap-2 text-[0.95rem] font-bold transition-all cursor-pointer py-2.5 px-4 rounded-xl min-h-[44px] ${post.liked_by_me ? 'text-[#A78BFA] bg-[#6C3FF5]/10 border border-[#6C3FF5]/30' : 'text-white/30 hover:text-white/50 hover:bg-white/5 border border-transparent'}`}
         >
           <span className={`text-2xl transition-all ${post.liked_by_me ? 'filter drop-shadow-[0_0_10px_rgba(108,63,245,0.8)]' : 'filter grayscale opacity-60'}`}>
             🐾
           </span>
-          <span className={post.liked_by_me ? 'text-[#A78BFA]' : ''}>
+          <span>
             {post.likes_count > 0 ? post.likes_count : 'Me gusta'}
           </span>
         </motion.button>

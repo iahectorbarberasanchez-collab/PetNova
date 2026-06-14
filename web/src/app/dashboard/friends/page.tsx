@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -70,15 +70,7 @@ export default function FriendsPage() {
     const [searching, setSearching] = useState(false)
     const [myRelations, setMyRelations] = useState<Friendship[]>([]) // all my friendships for status check
 
-    useEffect(() => {
-        supabase.auth.getUser().then(async ({ data: { user } }) => {
-            if (!user) { router.push('/auth'); return }
-            setUserId(user.id)
-            await loadData(user.id)
-        })
-    }, [])
-
-    const loadData = async (uid: string) => {
+    const loadData = useCallback(async (uid: string) => {
         setLoading(true)
 
         // Load all friendships where I'm involved
@@ -116,7 +108,15 @@ export default function FriendsPage() {
         setRequests(pending)
 
         setLoading(false)
-    }
+    }, [])
+
+    useEffect(() => {
+        supabase.auth.getUser().then(async ({ data: { user } }) => {
+            if (!user) { router.push('/auth'); return }
+            setUserId(user.id)
+            await loadData(user.id)
+        })
+    }, [router, loadData])
 
     const handleAccept = async (friendshipId: string) => {
         await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendshipId)
@@ -372,7 +372,7 @@ export default function FriendsPage() {
 
                                 {searchResults.length === 0 && searchQuery.length >= 2 && !searching && (
                                     <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(248,248,255,0.35)', fontSize: '0.88rem' }}>
-                                        Sin resultados para "{searchQuery}"
+                                        Sin resultados para &quot;{searchQuery}&quot;
                                     </div>
                                 )}
 

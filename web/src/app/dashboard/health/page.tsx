@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Breadcrumbs from '@/components/Breadcrumbs'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 import {
     Plus,
     Trash2,
@@ -15,8 +15,7 @@ import {
     Clock,
     PawPrint
 } from 'lucide-react'
-import Sidebar from '@/components/Sidebar'
-import DashboardLayout from '@/components/DashboardLayout'
+import DashboardLayout from '@/components/layout/DashboardLayout'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -28,7 +27,7 @@ import { useUser } from '@/hooks/useUser'
 import { HealthRecord } from '@/lib/types'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const TYPE_META: Record<string, { label: string; color: string; icon: any }> = {
+const TYPE_META: Record<string, { label: string; color: string; icon: React.ElementType }> = {
     vaccine: { label: 'Vacuna', color: '#6C3FF5', icon: Stethoscope },
     deworming: { label: 'Desparasitación', color: '#F97316', icon: Stethoscope },
     checkup: { label: 'Revisión', color: '#00D4FF', icon: Stethoscope },
@@ -221,7 +220,7 @@ export default function HealthPage() {
                                                         <PremiumButton
                                                             onClick={() => handleDelete(rec.id, rec.title)}
                                                             variant="ghost"
-                                                            className="!w-10 !h-10 !p-0 opacity-0 group-hover:opacity-100 transition-all hover:!bg-red-500/10"
+                                                            className="!w-11 !h-11 !p-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:!bg-red-500/10 flex items-center justify-center"
                                                             disabled={isDel}
                                                             icon={<Trash2 size={18} className="text-red-400" />}
                                                         >
@@ -330,7 +329,7 @@ export default function HealthPage() {
 
                             {/* Proactive Tip Card */}
                             {firstPet && (
-                                <ProactiveTip pet={firstPet as any} />
+                                <ProactiveTip pet={firstPet} />
                             )}
                         </div>
                     </div>

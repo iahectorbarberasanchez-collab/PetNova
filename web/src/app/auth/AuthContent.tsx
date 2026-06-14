@@ -1,11 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-
-type Mode = 'login' | 'signup'
+import { useAuth, AuthMode } from '@/features/auth/hooks/useAuth'
 
 const inputStyle: React.CSSProperties = {
     width: '100%', background: 'rgba(20,20,38,0.9)',
@@ -17,72 +13,20 @@ const focusStyle = { borderColor: '#6C3FF5', boxShadow: '0 0 0 3px rgba(108,63,2
 const blurStyle = { borderColor: 'rgba(108,63,245,0.2)', boxShadow: 'none' }
 
 export function AuthContent() {
-    const supabase = createClient()
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    const [mode, setMode] = useState<Mode>('login')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [name, setName] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [googleLoading, setGoogleLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState<string | null>(null)
-    const [refCode, setRefCode] = useState<string | null>(null)
-
-    useEffect(() => {
-        const ref = searchParams.get('ref')
-        if (ref) {
-            const code = ref.toUpperCase().trim()
-            setRefCode(code)
-            setMode('signup')
-            // Almacenar en cookie para persistencia (2 horas)
-            document.cookie = `petnova_ref=${code}; path=/; max-age=7200; SameSite=Lax`
-        }
-    }, [searchParams])
-
-    const getCallbackUrl = () => refCode
-        ? `${window.location.origin}/auth/callback?ref=${refCode}`
-        : `${window.location.origin}/auth/callback`
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true); setError(null); setSuccess(null)
-        try {
-            if (mode === 'signup') {
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: { full_name: name },
-                        emailRedirectTo: getCallbackUrl(),
-                    },
-                })
-                if (error) setError(error.message)
-                else setSuccess('¡Revisa tu email para confirmar tu cuenta! 🐾')
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({ email, password })
-                if (error) setError(error.message)
-                else router.push('/dashboard')
-            }
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleGoogle = async () => {
-        setGoogleLoading(true); setError(null)
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: getCallbackUrl(),
-                queryParams: { access_type: 'offline', prompt: 'consent' },
-            },
-        })
-        if (error) { setError(error.message); setGoogleLoading(false) }
-    }
-
-    const switchMode = (m: Mode) => { setMode(m); setError(null); setSuccess(null) }
+    const {
+        mode,
+        email, setEmail,
+        password, setPassword,
+        name, setName,
+        loading,
+        googleLoading,
+        error,
+        success,
+        refCode,
+        handleEmailAuth,
+        handleGoogleAuth,
+        switchMode
+    } = useAuth()
 
     return (
         <div style={{
@@ -157,7 +101,7 @@ export function AuthContent() {
                     }}
                 >
                     <div style={{ display: 'flex', gap: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 16, padding: 6, marginBottom: 28 }}>
-                        {(['login', 'signup'] as Mode[]).map(m => (
+                        {(['login', 'signup'] as AuthMode[]).map(m => (
                             <button key={m} onClick={() => switchMode(m)} style={{
                                 flex: 1, padding: '12px 0', borderRadius: 12, border: 'none', cursor: 'pointer',
                                 fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.9rem',
@@ -184,7 +128,7 @@ export function AuthContent() {
                     </div>
 
                     <button
-                        onClick={handleGoogle}
+                        onClick={handleGoogleAuth}
                         disabled={googleLoading}
                         style={{
                             width: '100%', padding: '14px 16px', borderRadius: 14,
@@ -230,7 +174,7 @@ export function AuthContent() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: mode === 'login' ? 15 : -15 }}
                             transition={{ duration: 0.35, ease: 'easeInOut' }}
-                            onSubmit={handleSubmit}
+                            onSubmit={handleEmailAuth}
                             style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
                         >
                             {mode === 'signup' && (

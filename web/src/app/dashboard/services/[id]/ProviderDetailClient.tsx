@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
@@ -99,12 +99,8 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
                     <span style={{ color: 'rgba(248,248,255,0.6)' }}>{name}</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 28, alignItems: 'start' }}>
-                    <div style={{
-                        background: 'rgba(13,13,25,0.85)', backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(108,63,245,0.15)', borderRadius: 24, padding: '36px',
-                        position: 'sticky', top: 24,
-                    }}>
+                <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-7 items-start">
+                    <div className="p-6 sm:p-9 bg-[rgba(13,13,25,0.85)] backdrop-blur-[20px] border border-[rgba(108,63,245,0.15)] rounded-[24px] lg:sticky lg:top-6">
                         <div style={{ textAlign: 'center', marginBottom: 24 }}>
                             <div style={{
                                 width: 110, height: 110, borderRadius: 24,
@@ -166,15 +162,7 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
                                 const cat = SERVICE_CATEGORIES[svc.service_type] || SERVICE_CATEGORIES['Other']
                                 const unit = PRICE_UNIT_LABEL[svc.price_unit] || svc.price_unit
                                 return (
-                                    <div key={svc.id} style={{
-                                        background: 'rgba(13,13,25,0.82)', backdropFilter: 'blur(12px)',
-                                        border: '1px solid rgba(108,63,245,0.13)', borderRadius: 18, padding: '22px 24px',
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16,
-                                        transition: 'border-color 0.2s',
-                                    }}
-                                        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(108,63,245,0.3)'}
-                                        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(108,63,245,0.13)'}
-                                    >
+                                    <div key={svc.id} className="bg-[rgba(13,13,25,0.82)] backdrop-blur-[12px] border border-[rgba(108,63,245,0.13)] rounded-[18px] p-5 md:p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all hover:border-[rgba(108,63,245,0.3)]">
                                         <div style={{ flex: 1 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                                                 <span style={{ fontSize: '1.1rem' }}>{cat.icon}</span>
@@ -186,20 +174,18 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
                                                 <p style={{ fontSize: '0.83rem', color: 'rgba(248,248,255,0.5)', margin: 0 }}>{svc.description}</p>
                                             )}
                                         </div>
-                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#00D4FF', lineHeight: 1.1 }}>{svc.price_amount}€</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'rgba(248,248,255,0.35)', marginBottom: 10 }}>{unit}</div>
+                                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 sm:gap-2 shrink-0">
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#00D4FF', lineHeight: 1.1 }}>{svc.price_amount}€</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'rgba(248,248,255,0.35)' }}>{unit}</div>
+                                            </div>
                                             <button
                                                 onClick={() => setModal({ open: true, service: svc })}
+                                                className="px-5 py-2.5 rounded-[11px] border-none text-white font-['Outfit',_sans-serif] font-bold text-[0.85rem] cursor-pointer min-h-[44px] inline-flex items-center justify-center"
                                                 style={{
-                                                    padding: '9px 20px', borderRadius: 11, border: 'none',
                                                     background: `linear-gradient(135deg, ${cat.color}, #6C3FF5)`,
-                                                    color: 'white', fontFamily: 'Outfit, sans-serif', fontWeight: 700,
-                                                    fontSize: '0.85rem', cursor: 'pointer',
-                                                    boxShadow: `0 4px 16px ${cat.color}30`, transition: 'all 0.2s',
+                                                    boxShadow: `0 4px 16px ${cat.color}30`,
                                                 }}
-                                                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                                                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                                             >
                                                 Contratar
                                             </button>
@@ -213,17 +199,8 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
             </main>
 
             {modal.open && modal.service && (
-                <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, backdropFilter: 'blur(12px)', padding: 20,
-                }}>
-                    <div style={{
-                        background: '#0D0D19', borderRadius: 24,
-                        border: '1px solid rgba(108,63,245,0.3)',
-                        width: '100%', maxWidth: 440, padding: '40px',
-                        boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
-                    }}>
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[1000] backdrop-blur-md p-4">
+                    <div className="w-full max-w-[440px] p-6 sm:p-10 bg-[#0D0D19] rounded-[24px] border border-[rgba(108,63,245,0.3)] shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
                         {success ? (
                             <div style={{ textAlign: 'center', padding: '20px 0' }}>
                                 <div style={{ fontSize: '3.5rem', marginBottom: 16 }}>🎉</div>
@@ -236,7 +213,7 @@ export default function ProviderDetailClient({ initialProvider }: { initialProvi
                             <>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                                     <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.3rem', margin: 0 }}>Reservar Servicio</h2>
-                                    <button onClick={() => setModal({ open: false, service: null })} style={{ background: 'none', border: 'none', color: 'rgba(248,248,255,0.4)', fontSize: '1.5rem', cursor: 'pointer', lineHeight: 1 }}>✕</button>
+                                    <button onClick={() => setModal({ open: false, service: null })} className="w-11 h-11 flex items-center justify-center bg-transparent border-none text-[rgba(248,248,255,0.4)] hover:text-white text-xl cursor-pointer transition-colors">✕</button>
                                 </div>
                                 <p style={{ fontSize: '0.88rem', color: 'rgba(248,248,255,0.55)', marginBottom: 24 }}>
                                     Solicitando <strong style={{ color: '#A78BFA' }}>{SERVICE_CATEGORIES[modal.service.service_type]?.label || 'Servicio'}</strong> con <strong>{name}</strong> · <span style={{ color: '#00D4FF' }}>{modal.service.price_amount}€ {PRICE_UNIT_LABEL[modal.service.price_unit] || modal.service.price_unit}</span>

@@ -18,16 +18,14 @@ import {
     Camera,
     X,
     PawPrint,
-    Filter as FilterIcon,
-    AlertTriangle,
     Dog,
     Cat,
     Bird,
     Rabbit
 } from 'lucide-react'
-import Sidebar from '@/components/Sidebar'
-import DashboardLayout from '@/components/DashboardLayout'
-import Breadcrumbs from '@/components/Breadcrumbs'
+
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import Breadcrumbs from '@/components/layout/Breadcrumbs'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { PremiumButton } from '@/components/ui/PremiumButton'
@@ -115,10 +113,7 @@ export default function AlertsPage() {
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const [submitting, setSubmitting] = useState(false)
 
-    // ── Load & Realtime ────────────────────────────────────────────────────────
     useEffect(() => {
-        let channel: any;
-
         const init = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) { router.push('/auth'); return }
@@ -131,45 +126,46 @@ export default function AlertsPage() {
                 .order('created_at', { ascending: false })
             setAlerts(data || [])
             setLoading(false)
-
-            // Realtime subscription
-            channel = supabase.channel('alerts-realtime')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'lost_pets' }, async (payload) => {
-                    if (payload.eventType === 'INSERT') {
-                        const { data: newRow } = await supabase.from('lost_pets')
-                            .select(`*, profile:profiles(display_name)`)
-                            .eq('id', payload.new.id)
-                            .single()
-                        if (newRow && newRow.status === 'active') {
-                            setAlerts(prev => {
-                                if (prev.some(a => a.id === newRow.id)) return prev
-                                return [newRow, ...prev]
-                            })
-                        }
-                    } else if (payload.eventType === 'UPDATE') {
-                        if (payload.new.status === 'resolved') {
-                            setAlerts(prev => prev.filter(a => a.id !== payload.new.id))
-                        } else {
-                            const { data: updatedRow } = await supabase.from('lost_pets')
-                                .select(`*, profile:profiles(display_name)`)
-                                .eq('id', payload.new.id)
-                                .single()
-                            if (updatedRow) {
-                                setAlerts(prev => prev.map(a => a.id === updatedRow.id ? updatedRow : a))
-                            }
-                        }
-                    } else if (payload.eventType === 'DELETE') {
-                        setAlerts(prev => prev.filter(a => a.id !== payload.old.id))
-                    }
-                })
-                .subscribe()
         }
 
         init()
+
+        // Realtime subscription
+        const channel = supabase.channel('alerts-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'lost_pets' }, async (payload) => {
+                if (payload.eventType === 'INSERT') {
+                    const { data: newRow } = await supabase.from('lost_pets')
+                        .select(`*, profile:profiles(display_name)`)
+                        .eq('id', payload.new.id)
+                        .single()
+                    if (newRow && newRow.status === 'active') {
+                        setAlerts(prev => {
+                            if (prev.some(a => a.id === newRow.id)) return prev
+                            return [newRow, ...prev]
+                        })
+                    }
+                } else if (payload.eventType === 'UPDATE') {
+                    if (payload.new.status === 'resolved') {
+                        setAlerts(prev => prev.filter(a => a.id !== payload.new.id))
+                    } else {
+                        const { data: updatedRow } = await supabase.from('lost_pets')
+                            .select(`*, profile:profiles(display_name)`)
+                            .eq('id', payload.new.id)
+                            .single()
+                        if (updatedRow) {
+                            setAlerts(prev => prev.map(a => a.id === updatedRow.id ? updatedRow : a))
+                        }
+                    }
+                } else if (payload.eventType === 'DELETE') {
+                    setAlerts(prev => prev.filter(a => a.id !== payload.old.id))
+                }
+            })
+            .subscribe()
+
         return () => {
-            if (channel) supabase.removeChannel(channel)
+            supabase.removeChannel(channel)
         }
-    }, [])
+    }, [router, supabase])
 
     const filtered = alerts.filter(a => a.type === tab)
     const lostCount = alerts.filter(a => a.type === 'lost').length
@@ -403,7 +399,7 @@ export default function AlertsPage() {
 
                                         {a.description && (
                                             <p className="text-sm text-white/60 mb-4 line-clamp-2 italic">
-                                                "{a.description}"
+                                                &quot;{a.description}&quot;
                                             </p>
                                         )}
 

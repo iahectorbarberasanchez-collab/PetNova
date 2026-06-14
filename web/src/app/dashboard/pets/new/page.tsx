@@ -4,8 +4,8 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
-import { Info, Leaf, Droplets, Thermometer, Box, Hash, LucideIcon, Users, Activity } from 'lucide-react'
+import Sidebar from '@/components/layout/Sidebar'
+import { Info, Leaf, Droplets, Thermometer, Box, LucideIcon, Users, Activity } from 'lucide-react'
 
 // --- Constants & Options ---
 const SPECIES_OPTIONS = [
@@ -30,11 +30,7 @@ interface AIResult {
     error?: string
 }
 
-const CONFIDENCE_STYLE: Record<string, { color: string; bg: string; label: string }> = {
-    'Alta': { color: '#10B981', bg: 'rgba(16,185,129,0.12)', label: '● Alta confianza' },
-    'Media': { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', label: '◐ Confianza media' },
-    'Baja': { color: '#FF6B6B', bg: 'rgba(255,107,107,0.12)', label: '○ Baja confianza' },
-}
+
 
 export default function NewPetPage() {
     const supabase = createClient()
@@ -51,7 +47,7 @@ export default function NewPetPage() {
     const [error, setError] = useState<string | null>(null)
 
     // Species Specific Data
-    const [specificData, setSpecificData] = useState<Record<string, any>>({})
+    const [specificData, setSpecificData] = useState<Record<string, unknown>>({})
     const [habitatNotes, setHabitatNotes] = useState('')
     const [dietaryRequirements, setDietaryRequirements] = useState('')
 
@@ -60,8 +56,6 @@ export default function NewPetPage() {
     const [imageBase64, setImageBase64] = useState<string | null>(null)
     const [imageMime, setImageMime] = useState<string>('image/jpeg')
     const [aiLoading, setAiLoading] = useState(false)
-    const [aiResult, setAiResult] = useState<AIResult | null>(null)
-    const [aiApplied, setAiApplied] = useState(false)
     const [dragOver, setDragOver] = useState(false)
 
     const processImageFile = (file: File) => {
@@ -70,8 +64,6 @@ export default function NewPetPage() {
             return
         }
         setError(null)
-        setAiResult(null)
-        setAiApplied(false)
         setImageMime(file.type || 'image/jpeg')
 
         const reader = new FileReader()
@@ -99,7 +91,6 @@ export default function NewPetPage() {
     const handleDetect = async () => {
         if (!imageBase64) return
         setAiLoading(true)
-        setAiResult(null)
         setError(null)
 
         try {
@@ -109,27 +100,21 @@ export default function NewPetPage() {
                 body: JSON.stringify({ imageBase64, mimeType: imageMime }),
             })
             const data: AIResult = await res.json()
-            setAiResult(data)
 
-            if (!data.error) {
+            if (data.error) {
+                setError(data.error)
+            } else {
                 if (data.speciesKey) setSpecies(data.speciesKey)
                 if (data.breed && data.breed !== 'Mestizo/a') setBreed(data.breed)
-                setAiApplied(true)
             }
         } catch {
-            setAiResult({ error: 'Error de red al conectar con la IA.' })
+            setError('Error de red al conectar con la IA.')
         } finally {
             setAiLoading(false)
         }
     }
 
-    const clearImage = () => {
-        setImagePreview(null)
-        setImageBase64(null)
-        setAiResult(null)
-        setAiApplied(false)
-        if (fileInputRef.current) fileInputRef.current.value = ''
-    }
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -168,7 +153,7 @@ export default function NewPetPage() {
         router.refresh()
     }
 
-    const updateSpecificData = (key: string, value: any) => {
+    const updateSpecificData = (key: string, value: unknown) => {
         setSpecificData(prev => ({ ...prev, [key]: value }))
     }
 
@@ -188,7 +173,7 @@ export default function NewPetPage() {
         color: 'rgba(248,248,255,0.4)', marginBottom: 8, letterSpacing: '0.04em',
     }
 
-    const confStyle = aiResult?.confidence ? (CONFIDENCE_STYLE[aiResult.confidence] || CONFIDENCE_STYLE['Media']) : null
+
 
     // --- Render Helpers ---
     const renderSpecificField = (label: string, Icon: LucideIcon, key: string, placeholder: string, type: string = 'text') => (
@@ -202,7 +187,7 @@ export default function NewPetPage() {
                     style={{ ...inputStyle, paddingLeft: 42 }} 
                     type={type} 
                     placeholder={placeholder} 
-                    value={specificData[key] || ''} 
+                    value={(specificData[key] as string) || ''} 
                     onChange={e => updateSpecificData(key, e.target.value)} 
                 />
             </div>

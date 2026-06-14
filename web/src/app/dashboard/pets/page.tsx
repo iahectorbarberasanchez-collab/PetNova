@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Search, PawPrint } from 'lucide-react'
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/layout/Sidebar'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PremiumButton } from '@/components/ui/PremiumButton'
 import { usePets } from '@/hooks/usePets'
-import { PetCard } from '@/components/PetCard'
+import { PetCard } from '@/components/common/PetCard'
 import { useUser } from '@/hooks/useUser'
 
 export default function PetsPage() {
@@ -18,7 +18,8 @@ export default function PetsPage() {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        setMounted(true)
+        const timer = setTimeout(() => setMounted(true), 0)
+        return () => clearTimeout(timer)
     }, [])
 
     const handleDelete = async (petId: string, petName: string) => {
@@ -113,7 +114,7 @@ export default function PetsPage() {
                                 {filteredPets.map(pet => (
                                     <PetCard
                                         key={pet.id}
-                                        pet={pet as any}
+                                        pet={pet}
                                         onDelete={handleDelete}
                                         isDeleting={false}
                                     />

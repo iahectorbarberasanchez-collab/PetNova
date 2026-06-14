@@ -84,23 +84,16 @@ export default async function BlogPostPage({ params }: Props) {
             </div>
 
             {/* Navbar */}
-            <nav style={{
-                position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-                backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-                borderBottom: '1px solid rgba(108,63,245,0.12)',
-                background: 'rgba(7,7,15,0.85)',
-                padding: '0 52px', height: 68,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
+            <nav className="fixed top-0 left-0 right-0 z-[100] backdrop-blur-[24px] border-b border-[rgba(108,63,245,0.12)] bg-[rgba(7,7,15,0.85)] px-4 md:px-[52px] h-[68px] flex items-center justify-between">
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
                     <div style={{ width: 38, height: 38, borderRadius: 11, background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🐾</div>
                     <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: '1.25rem', background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PetNova</span>
                 </Link>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <Link href="/blog" style={{ padding: '9px 22px', borderRadius: 11, border: '1px solid rgba(108,63,245,0.25)', color: 'rgba(248,248,255,0.7)', fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: '0.88rem', textDecoration: 'none' }}>
+                    <Link href="/blog" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] border border-[rgba(108,63,245,0.25)] text-[rgba(248,248,255,0.7)] font-['Outfit',_sans-serif] font-semibold text-[0.88rem] no-underline transition-all duration-200 hover:bg-white/5 min-h-[44px] inline-flex items-center">
                         ← Blog
                     </Link>
-                    <Link href="/auth" style={{ padding: '9px 22px', borderRadius: 11, background: 'linear-gradient(135deg, #6C3FF5, #00D4FF)', color: 'white', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none' }}>
+                    <Link href="/auth" className="px-4 py-2 md:px-[22px] md:py-[9px] rounded-[11px] bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] text-white font-['Outfit',_sans-serif] font-bold text-[0.88rem] no-underline transition-all duration-200 hover:scale-105 min-h-[44px] inline-flex items-center justify-center">
                         Entrar →
                     </Link>
                 </div>
@@ -169,6 +162,7 @@ export default async function BlogPostPage({ params }: Props) {
 
                 {/* Main content */}
                 <div
+                    className="blog-content"
                     style={{ color: 'rgba(248,248,255,0.75)', fontSize: '1.02rem', lineHeight: 1.9, fontFamily: 'Inter, sans-serif' }}
                     dangerouslySetInnerHTML={{ __html: (post.content as string).replace(/\n/g, '<br />') }}
                 />
@@ -201,7 +195,7 @@ export default async function BlogPostPage({ params }: Props) {
                         <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: '0.75rem', color: 'rgba(248,248,255,0.3)', letterSpacing: '0.18em', textTransform: 'uppercase' as const, marginBottom: 28 }}>
                             También te puede interesar
                         </h2>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                             {(related as RelatedPost[]).map((p) => {
                                 const c = CATEGORY_COLORS[p.category] || '#8B5CF6'
                                 return (

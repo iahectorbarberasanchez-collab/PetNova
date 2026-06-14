@@ -56,9 +56,9 @@ export const viewport: Viewport = {
 }
 
 import PWAHandler from '@/components/PWAHandler'
-import MobileNav from '@/components/MobileNav'
-import MobileHeader from '@/components/MobileHeader'
-import { ToastProvider } from '@/components/ToastProvider'
+import MobileNav from '@/components/layout/MobileNav'
+import MobileHeader from '@/components/layout/MobileHeader'
+import { ToastProvider } from '@/components/common/ToastProvider'
 
 export default function RootLayout({
   children,
