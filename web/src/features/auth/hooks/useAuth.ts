@@ -33,6 +33,14 @@ export function useAuth() {
         ? `${window.location.origin}/auth/callback?ref=${refCode}`
         : `${window.location.origin}/auth/callback`
 
+    const getErrorMessage = (err: any) => {
+        if (!err) return 'Ocurrió un error inesperado'
+        const msg = typeof err === 'string' ? err : err.message
+        return msg === 'Failed to fetch' 
+            ? 'El servidor no está accesible en este momento. Por favor, revisa tu conexión a internet o inténtalo más tarde.' 
+            : msg
+    }
+
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true); setError(null); setSuccess(null)
@@ -46,13 +54,15 @@ export function useAuth() {
                         emailRedirectTo: getCallbackUrl(),
                     },
                 })
-                if (error) setError(error.message)
+                if (error) setError(getErrorMessage(error))
                 else setSuccess('¡Revisa tu email para confirmar tu cuenta! 🐾')
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password })
-                if (error) setError(error.message)
+                if (error) setError(getErrorMessage(error))
                 else router.push('/dashboard')
             }
+        } catch (err: any) {
+            setError(getErrorMessage(err))
         } finally {
             setLoading(false)
         }
@@ -60,14 +70,18 @@ export function useAuth() {
 
     const handleGoogleAuth = async () => {
         setGoogleLoading(true); setError(null)
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: getCallbackUrl(),
-                queryParams: { access_type: 'offline', prompt: 'consent' },
-            },
-        })
-        if (error) { setError(error.message); setGoogleLoading(false) }
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: getCallbackUrl(),
+                    queryParams: { access_type: 'offline', prompt: 'consent' },
+                },
+            })
+            if (error) { setError(getErrorMessage(error)); setGoogleLoading(false) }
+        } catch (err: any) {
+            setError(getErrorMessage(err)); setGoogleLoading(false)
+        }
     }
 
     const switchMode = (m: AuthMode) => { setMode(m); setError(null); setSuccess(null) }

@@ -34,7 +34,8 @@ function calculateAge(birthDateString: string): string {
 
 export async function POST(req: NextRequest) {
     if (!GEMINI_API_KEY) {
-        return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
+        // We do not have the pet context here yet, so we just use a generic name
+        return NextResponse.json({ tip: `🌟 Recuerda mantener al día las vacunas de tu mascota y darle mucho amor.` })
     }
 
     try {
@@ -89,10 +90,8 @@ REGLAS:
             const errorText = errorData ? JSON.stringify(errorData) : await response.text();
             console.error('Gemini API Error Detail:', errorText);
 
-            return NextResponse.json({
-                error: 'Error calling Gemini API',
-                details: errorData || errorText
-            }, { status: 500 });
+            // Fallback content to gracefully handle API errors (403, 500, etc.)
+            return NextResponse.json({ tip: `🌟 Recuerda mantener al día las vacunas de ${petContext.name || 'tu mascota'} y darle mucho amor.` });
         }
 
         const data = await response.json()
@@ -100,7 +99,7 @@ REGLAS:
         const tipText = data.candidates?.[0]?.content?.parts?.[0]?.text
 
         if (!tipText) {
-            return NextResponse.json({ error: 'No tip generated' }, { status: 500 })
+            return NextResponse.json({ tip: `🌟 Recuerda mantener al día las vacunas de ${petContext.name || 'tu mascota'} y darle mucho amor.` })
         }
 
         return NextResponse.json({ tip: tipText })

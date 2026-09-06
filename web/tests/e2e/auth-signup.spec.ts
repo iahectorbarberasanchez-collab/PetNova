@@ -16,7 +16,7 @@ test.describe('Flow 01: Registro de un usuario nuevo', () => {
     // Generar datos aleatorios de prueba
     const randomSuffix = Math.floor(Math.random() * 1000000);
     const testName = `QA Tester ${randomSuffix}`;
-    const testEmail = `test-qa-${randomSuffix}@example.com`;
+    const testEmail = `test-qa-${randomSuffix}@gmail.com`;
     const testPassword = `PassWord${randomSuffix}!`;
 
     // 3. Rellenar el formulario
