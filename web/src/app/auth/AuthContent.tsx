@@ -62,7 +62,7 @@ export function AuthContent() {
                         marginBottom: 18, fontSize: 38,
                     }}>🐾</div>
                     <h1 style={{ fontSize: '2.4rem', fontFamily: 'Outfit, sans-serif', fontWeight: 800, marginBottom: 8, background: 'linear-gradient(135deg, #A78BFA, #00D4FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.02em' }}>
-                        PetNova
+                        PetNexa
                     </h1>
                     <p style={{ color: 'rgba(248,248,255,0.5)', fontSize: '1rem', fontWeight: 500 }}>
                         {mode === 'login' ? 'Bienvenido de vuelta 👋' : 'Únete a la comunidad 🐶🐱'}

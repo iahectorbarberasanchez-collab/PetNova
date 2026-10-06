@@ -142,12 +142,12 @@ export default function PetCoinsPage() {
         { icon: <TrendingUp className="text-[#00D4FF]" size={22} />, title: 'Paseos Activos', description: 'Cuanto más camines con tu peludo, más monedas ganarás por distancia y duración.', color: '#00D4FF' },
         { icon: <Users className="text-[#00E5A0]" size={22} />, title: 'Comunidad', description: 'Participa en Pet-stagram, comenta, y ayuda reportando alertas de extravío.', color: '#00E5A0' },
         { icon: <ShieldCheck className="text-[#8B5CF6]" size={22} />, title: 'Desafíos Semanales', description: 'Completa retos de salud y bienestar que proponemos en la app para ti y tu mascota.', color: '#8B5CF6' },
-        { icon: <Gift className="text-[#F59E0B]" size={22} />, title: 'Plan Premium', description: 'Recibe 500 PetCoins gratis cada mes con PetNova Pro, además de multiplicadores.', color: '#F59E0B' },
+        { icon: <Gift className="text-[#F59E0B]" size={22} />, title: 'Plan Premium', description: 'Recibe 500 PetCoins gratis cada mes con PetNexa Pro, además de multiplicadores.', color: '#F59E0B' },
         { icon: <Users className="text-[#EC4899]" size={22} />, title: 'Invita Amigos 🎁', description: 'Por cada amigo que se registre con tu enlace ganas 50 PetCoins. ¡Tu amigo también recibe 100!', color: '#EC4899' },
     ]
 
     const waysToSpend = [
-        { title: 'Votar al Fondo de Donaciones', description: 'Elige qué refugio recibe el bote mensual de €200 de PetNova. ¡Tu voto importa!', gradient: 'from-[#00E5A0] to-[#00D4FF]' },
+        { title: 'Votar al Fondo de Donaciones', description: 'Elige qué refugio recibe el bote mensual de €200 de PetNexa. ¡Tu voto importa!', gradient: 'from-[#00E5A0] to-[#00D4FF]' },
         { title: 'Descuentos en Pet Shops', description: 'Canjea por códigos de descuento de hasta un 30% en tiendas afiliadas.', gradient: 'from-[#6C3FF5] to-[#00D4FF]' },
         { title: 'Servicios Veterinarios', description: 'Paga parcial o totalmente consultas con nuestra red de veterinarios.', gradient: 'from-[#F59E0B] to-[#EF4444]' },
         { title: 'Funciones Exclusivas', description: 'Desbloquea insignias especiales, avatares premium y opciones de personalización.', gradient: 'from-[#8B5CF6] to-[#EC4899]' },
@@ -181,7 +181,7 @@ export default function PetCoinsPage() {
                                     </span>
                                 </div>
                                 <p className="text-white/35 font-inter text-sm mt-4 relative z-10 flex items-center gap-1.5">
-                                    <ShoppingBag size={13} /> Listas para gastar en el ecosistema PetNova
+                                    <ShoppingBag size={13} /> Listas para gastar en el ecosistema PetNexa
                                 </p>
 
                                 {/* ── RECENT TRANSACTIONS ── */}
@@ -246,7 +246,7 @@ export default function PetCoinsPage() {
                                     <div className="p-5 rounded-2xl bg-[#00E5A0]/5 border border-[#00E5A0]/20 font-inter text-sm text-white/70 leading-relaxed grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div><span className="text-[#00E5A0] font-bold block mb-1">① Vota</span>Elige un refugio y dona mínimo 50 PetCoins. Las monedas se descuentan de tu saldo.</div>
                                         <div><span className="text-[#00D4FF] font-bold block mb-1">② Acumula</span>El refugio más votado del mes gana. Las barras muestran el porcentaje de votos acumulados.</div>
-                                        <div><span className="text-[#F59E0B] font-bold block mb-1">③ Dona</span>PetNova transfiere €{MONTHLY_POT} al refugio ganador el 1 de cada mes.</div>
+                                        <div><span className="text-[#F59E0B] font-bold block mb-1">③ Dona</span>PetNexa transfiere €{MONTHLY_POT} al refugio ganador el 1 de cada mes.</div>
                                     </div>
                                 </motion.div>
                             )}
@@ -417,8 +417,8 @@ export default function PetCoinsPage() {
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                                 <h3 className="font-outfit font-bold text-2xl mb-4 text-[#00D4FF]">¿Qué son las PetCoins?</h3>
                                 <p className="text-white/70 font-inter leading-relaxed text-[1.02rem]">
-                                    Las PetCoins son la moneda virtual oficial del ecosistema PetNova. Las hemos diseñado para recompensar a los dueños responsables e incentivar las buenas prácticas en el cuidado animal.
-                                    Cada vez que interactúas positivamente en la plataforma, PetNova te lo agradece con PetCoins.
+                                    Las PetCoins son la moneda virtual oficial del ecosistema PetNexa. Las hemos diseñado para recompensar a los dueños responsables e incentivar las buenas prácticas en el cuidado animal.
+                                    Cada vez que interactúas positivamente en la plataforma, PetNexa te lo agradece con PetCoins.
                                 </p>
                             </motion.div>
                         </div>

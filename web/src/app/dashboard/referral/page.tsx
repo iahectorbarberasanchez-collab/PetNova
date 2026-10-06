@@ -40,7 +40,7 @@ export default function ReferralPage() {
                     <PageHeader
                         title="Invitar Amigos"
                         emoji="🎁"
-                        subtitle="Comparte PetNova con quien quieras. Tú ganas PetCoins, ellos también."
+                        subtitle="Comparte PetNexa con quien quieras. Tú ganas PetCoins, ellos también."
                     />
 
                     {/* ── STATS ROW ── */}
@@ -78,7 +78,7 @@ export default function ReferralPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                 {[
                                     { step: '①', color: '#A78BFA', title: 'Comparte tu link', desc: 'Copia tu enlace personal y envíaselo a un amigo.' },
-                                    { step: '②', color: '#00D4FF', title: 'Se registra', desc: 'Tu amigo se registra en PetNova a través de tu enlace.' },
+                                    { step: '②', color: '#00D4FF', title: 'Se registra', desc: 'Tu amigo se registra en PetNexa a través de tu enlace.' },
                                     { step: '③', color: '#00E5A0', title: '¡Ambos ganáis!', desc: 'Tu amigo recibe 100 PetCoins y tú recibes 50 PetCoins.' },
                                 ].map((s, i) => (
                                     <div key={i} className="flex gap-3 items-start">
@@ -145,7 +145,7 @@ export default function ReferralPage() {
 
                             <div className="flex gap-3 mt-4 relative z-10 flex-wrap">
                                 <a
-                                    href={`https://wa.me/?text=${encodeURIComponent(`🐾 ¡Únete a PetNova, la app para dueños de mascotas! Regístrate con mi enlace y recibirás 100 PetCoins de regalo: ${referralLink}`)}`}
+                                    href={`https://wa.me/?text=${encodeURIComponent(`🐾 ¡Únete a PetNexa, la app para dueños de mascotas! Regístrate con mi enlace y recibirás 100 PetCoins de regalo: ${referralLink}`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
@@ -154,7 +154,7 @@ export default function ReferralPage() {
                                     <span className="text-base">📱</span> WhatsApp
                                 </a>
                                 <a
-                                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🐾 ¡Únete a PetNova y gana 100 PetCoins de regalo! ${referralLink}`)}`}
+                                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`🐾 ¡Únete a PetNexa y gana 100 PetCoins de regalo! ${referralLink}`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
@@ -172,7 +172,7 @@ export default function ReferralPage() {
                                     <Facebook size={14} /> Facebook
                                 </a>
                                 <a
-                                    href={`mailto:?subject=${encodeURIComponent('🐾 ¡Únete a PetNova!')}&body=${encodeURIComponent(`¡Hola! Te invito a unirte a PetNova, la app para dueños de mascotas. Regístrate con mi enlace y recibirás 100 PetCoins de regalo: ${referralLink}`)}`}
+                                    href={`mailto:?subject=${encodeURIComponent('🐾 ¡Únete a PetNexa!')}&body=${encodeURIComponent(`¡Hola! Te invito a unirte a PetNexa, la app para dueños de mascotas. Regístrate con mi enlace y recibirás 100 PetCoins de regalo: ${referralLink}`)}`}
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-outfit font-semibold transition-all hover:scale-105 active:scale-95"
                                     style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.2)', color: '#FFD700' }}
                                 >

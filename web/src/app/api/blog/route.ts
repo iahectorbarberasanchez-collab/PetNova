@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
             content,
             excerpt,
             cover_image_url,
-            author = 'PetNova Team',
+            author = 'PetNexa Team',
             category = 'Consejos',
             tags = [],
             slug: customSlug,

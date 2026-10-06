@@ -56,7 +56,7 @@ export default function WikiPage() {
                         </div>
                         <h1 className="text-4xl sm:text-5xl font-black font-outfit mb-5">
                             <BookOpen className="inline-block mr-3 text-[#00D4FF]" size={40} style={{ verticalAlign: 'middle' }} />
-                            PetNova Wiki
+                            PetNexa Wiki
                         </h1>
                         
                         <div style={{ position: 'relative', maxWidth: 600 }}>

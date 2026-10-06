@@ -104,11 +104,11 @@ export default function Sidebar() {
                 <Link href="/dashboard" className="flex items-center gap-4 no-underline group">
                     <div className="relative">
                         <div className="absolute -inset-2 bg-[var(--primary)]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <img src="/logo.png" alt="PetNova" className="w-11 h-11 rounded-2xl shadow-[0_8px_30px_rgba(108,63,245,0.3)] object-cover group-hover:scale-105 transition-all duration-500" />
+                        <img src="/logo.png" alt="PetNexa" className="w-11 h-11 rounded-2xl shadow-[0_8px_30px_rgba(108,63,245,0.3)] object-cover group-hover:scale-105 transition-all duration-500" />
                     </div>
                     <div>
                         <h1 className="font-[var(--font-heading)] font-black text-xl leading-none tracking-tight bg-gradient-to-br from-white via-white to-[var(--primary)] bg-clip-text text-transparent">
-                            PetNova
+                            PetNexa
                         </h1>
                         <p className="text-[10px] text-[var(--text-dim)] font-bold tracking-[0.22em] uppercase mt-1.5 opacity-60">Control Panel</p>
                     </div>

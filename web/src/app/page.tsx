@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'PetNova | Todo para tu Mascota en un Solo Lugar',
+  title: 'PetNexa | Todo para tu Mascota en un Solo Lugar',
   description: 'La app definitiva para dueños de mascotas. Cartilla médica digital, red social, servicios de paseo, cuidado, adiestramiento y más. ¡Únete gratis!',
   keywords: ['mascotas', 'cuidado animal', 'red social mascotas', 'servicios para mascotas', 'cartilla veterinaria digital', 'adiestramiento', 'paseador de perros'],
 }
@@ -53,10 +53,10 @@ const features = [
 ]
 
 const stats = [
-  { value: '1M+', label: 'Mascotas registradas', icon: '🐾' },
-  { value: '98%', label: 'Dueños satisfechos', icon: '⭐' },
-  { value: '24/7', label: 'Soporte veterinario', icon: '💊' },
-  { value: '50+', label: 'Tipos de mascotas', icon: '🦜' },
+  { value: 'Beta', label: 'Abierta y gratuita', icon: '🐾' },
+  { value: 'PetBot', label: 'Asistente con IA', icon: '🤖' },
+  { value: 'Vacunas', label: 'Recordatorios automáticos', icon: '💉' },
+  { value: 'Mapa', label: 'Servicios pet-friendly', icon: '📍' },
 ]
 
 const pets = ['🐶', '🐱', '🐦', '🐟', '🐇', '🦎', '🐹', '🦜', '🐢', '🐍', '🐴', '🐓', '🦀', '🐸', '🕷️']
@@ -76,7 +76,7 @@ export default function HomePage() {
         <div className="flex items-center gap-[10px]">
           <div className="w-[38px] h-[38px] rounded-[11px] bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] flex items-center justify-center text-[20px] shadow-[0_4px_16px_rgba(108,63,245,0.4)]">🐾</div>
           <span className="font-['Outfit',_sans-serif] font-extrabold text-[1.25rem] tracking-tight bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">
-            PetNova
+            PetNexa
           </span>
         </div>
         <div className="flex items-center gap-2 md:gap-3">
@@ -107,7 +107,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-[clamp(1rem,2.2vw,1.2rem)] text-[rgba(248,248,255,0.7)] max-w-[660px] mx-auto mb-12 leading-relaxed">
-          Cartilla médica digital, red social para mascotas, alertas de pérdida en tiempo real y mucho más. Gratis para siempre.
+          Cartilla médica digital, PetBot con IA, mapa de servicios, alertas de mascotas perdidas y mucho más. Gratis durante la beta.
         </p>
 
         {/* CTAs */}
@@ -154,7 +154,7 @@ export default function HomePage() {
             <span className="bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">cada momento</span>
           </h2>
           <p className="text-[rgba(248,248,255,0.6)] text-[1.05rem] max-w-[540px] mx-auto leading-relaxed">
-            PetNova acompaña a tu mascota desde cachorro hasta senior, cubriendo todas sus necesidades.
+            PetNexa acompaña a tu mascota desde cachorro hasta senior, cubriendo todas sus necesidades.
           </p>
         </div>
 
@@ -188,7 +188,7 @@ export default function HomePage() {
             <span className="bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">mascota</span>?
           </h2>
           <p className="text-[rgba(248,248,255,0.7)] text-[1.05rem] mb-[36px] leading-[1.7]">
-            Únete a miles de dueños que ya confían en PetNova. Gratis para siempre.
+            Estamos en beta: entra gratis y ayúdanos a mejorarla.
           </p>
           <Link href="/auth" className="px-[32px] md:px-[52px] py-[16px] rounded-[14px] bg-gradient-to-br from-[#6C3FF5] to-[#00D4FF] text-white font-['Outfit',_sans-serif] font-bold text-[1.05rem] inline-block shadow-[0_8px_40px_rgba(108,63,245,0.5)] transition-transform hover:scale-105">
             Empezar Ahora – Es Gratis 🚀
@@ -200,9 +200,9 @@ export default function HomePage() {
       <footer className="relative z-10 border-t border-[rgba(108,63,245,0.1)] py-[32px] px-6 md:px-[52px] flex flex-col sm:flex-row justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-[8px]">
           <span className="text-[20px]">🐾</span>
-          <span className="font-['Outfit',_sans-serif] font-bold bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">PetNova</span>
+          <span className="font-['Outfit',_sans-serif] font-bold bg-gradient-to-br from-[#A78BFA] to-[#00D4FF] bg-clip-text text-transparent">PetNexa</span>
         </div>
-        <p className="text-[rgba(248,248,255,0.4)] text-[0.82rem] text-center">© 2026 PetNova. Todos los derechos reservados.</p>
+        <p className="text-[rgba(248,248,255,0.4)] text-[0.82rem] text-center">© 2026 PetNexa. Todos los derechos reservados.</p>
         <div className="flex gap-[24px]">
           {['Privacidad', 'Términos', 'Contacto'].map(l => (
             <a key={l} href="#" className="text-[rgba(248,248,255,0.5)] hover:text-white transition-colors text-[0.82rem] no-underline">{l}</a>

@@ -1,6 +1,6 @@
 {
-  "name": "PetNova",
-  "short_name": "PetNova",
+  "name": "PetNexa",
+  "short_name": "PetNexa",
   "description": "La plataforma definitiva para dueños de mascotas.",
   "start_url": "/dashboard",
   "display": "standalone",

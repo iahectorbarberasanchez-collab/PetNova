@@ -314,7 +314,7 @@ export default function MapPage() {
                 className="text-center"
             >
                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-6" />
-                <p className="text-white/40 font-bold tracking-widest uppercase text-xs">PetNova Map</p>
+                <p className="text-white/40 font-bold tracking-widest uppercase text-xs">PetNexa Map</p>
             </motion.div>
         </div>
     )

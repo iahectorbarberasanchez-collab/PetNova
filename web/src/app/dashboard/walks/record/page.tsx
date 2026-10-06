@@ -276,7 +276,7 @@ export default function WalksRecordPage() {
         const { error } = await supabase.from('walks').insert({
             user_id: userId,
             pet_id: selectedPetId || null,
-            title: walkTitle || 'Paseo PetNova',
+            title: walkTitle || 'Paseo PetNexa',
             route: route,
             distance_km: distanceKm,
             duration_seconds: durationSecs,
@@ -396,7 +396,7 @@ export default function WalksRecordPage() {
                                     <div className="flex items-center gap-4 text-primary">
                                         <TrendingUp size={20} />
                                         <div>
-                                            <p className="text-[10px] font-black uppercase tracking-tighter">Bono PetNova</p>
+                                            <p className="text-[10px] font-black uppercase tracking-tighter">Bono PetNexa</p>
                                             <p className="text-xs font-bold text-white/80">Gana 15 PetCoins por cada km</p>
                                         </div>
                                     </div>

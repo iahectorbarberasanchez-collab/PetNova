@@ -31,13 +31,13 @@ export default function MobileHeader() {
       <Link href="/dashboard" className="flex items-center gap-2">
         <Image
           src="/logo.png"
-          alt="PetNova Logo"
+          alt="PetNexa Logo"
           width={32}
           height={32}
           className="rounded-lg shadow-lg shadow-[#6C3FF5]/40 object-cover"
         />
         <span className="font-outfit font-extrabold text-lg tracking-tight bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-          PetNova
+          PetNexa
         </span>
       </Link>
 

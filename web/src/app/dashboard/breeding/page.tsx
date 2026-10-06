@@ -184,7 +184,7 @@ export default function BreedingPage() {
 
                             <div style={{ background: 'rgba(13,13,25,0.6)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 28, padding: 32 }}>
                                 <h4 style={{ margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}><Star size={18} color="#F59E0B" /> Próximos Pasos</h4>
-                                <p style={{ fontSize: '0.8rem', opacity: 0.4, margin: '0 0 16px' }}>En la próxima versión podrás generar certificados genealógicos IA verificados por la red PetNova.</p>
+                                <p style={{ fontSize: '0.8rem', opacity: 0.4, margin: '0 0 16px' }}>En la próxima versión podrás generar certificados genealógicos IA verificados por la red PetNexa.</p>
                                 <div style={{ padding: '12px 20px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', color: 'rgba(248,248,255,0.2)', fontSize: '0.7rem', fontWeight: 800 }}>PRÓXIMAMENTE: RED DE CRIADORES</div>
                             </div>
                         </div>

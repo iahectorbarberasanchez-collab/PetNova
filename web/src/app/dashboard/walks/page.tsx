@@ -179,7 +179,7 @@ export default function WalksPage() {
                                                 <div className="flex-1">
                                                     <div className="flex items-center justify-between">
                                                         <h3 className="font-black text-lg uppercase tracking-tight text-white group-hover:text-primary transition-colors">
-                                                            {walk.title || 'Exploración PetNova'}
+                                                            {walk.title || 'Exploración PetNexa'}
                                                         </h3>
                                                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 bg-white/5 py-1 px-3 rounded-full border border-white/5">
                                                             {timeAgo(walk.created_at)}
